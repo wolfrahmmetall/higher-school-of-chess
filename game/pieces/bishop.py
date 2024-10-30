@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional
-import Piece
+from game.pieces.piece import Piece
+
 class Bishop(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
         """

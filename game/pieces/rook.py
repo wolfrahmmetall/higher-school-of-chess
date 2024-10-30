@@ -1,32 +1,33 @@
 from typing import List, Tuple, Optional
-import Piece
-class Queen(Piece):
+from game.pieces.piece import Piece
+class Rook(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
         """
-        Инициализация ферзя.
+        Инициализация ладьи.
 
         :param color: 'white' или 'black'
-        :param position: Кортеж (row, column) текущей позиции ферзя (индексация с 0)
+        :param position: Кортеж (row, column) текущей позиции ладьи (индексация с 0)
         """
         super().__init__(color, position)
+        self.has_moved = False  # Атрибут для отслеживания перемещений ладьи
 
     def name(self) -> str:
         """
-        Возвращает обозначение ферзя.
+        Возвращает обозначение ладьи.
 
-        :return: 'Q' для белого ферзя, 'q' для чёрного ферзя.
+        :return: 'R' для белой ладьи, 'r' для чёрной ладьи.
         """
-        return 'Q' if self.color == 'white' else 'q'
+        return 'R' if self.color == 'white' else 'r'
 
     def show_possible_moves(self, board: List[List[str]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
         """
-        Возвращает список возможных ходов для ферзя в текущей позиции.
+        Возвращает список возможных ходов для ладьи в текущей позиции.
 
         :param board: 8x8 матрица, представляющая шахматную доску.
                       Пустые клетки обозначены '',
                       белые фигуры начинаются с 'W', чёрные с 'B'.
-        :param last_move: Не используется для ферзя, добавлен для совместимости.
-        :return: Список строк с возможными ходами в формате 'a4', 'b5Q' и т.д.
+        :param last_move: Не используется для ладьи, добавлен для совместимости.
+        :return: Список строк с возможными ходами в формате 'a4', 'b5' и т.д.
         """
         moves = []
         row, col = self.current_square
@@ -35,10 +36,8 @@ class Queen(Piece):
         if self.is_tied():
             return moves  # Пустой список, так как фигура связана
 
-        # Направления движения ферзя (комбинация направлений ладьи и слона)
-        directions = [(-1, -1), (-1, 0), (-1, 1),
-                      (0, -1),          (0, 1),
-                      (1, -1),  (1, 0), (1, 1)]
+        # Направления движения ладьи (вертикали и горизонтали)
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
         for dr, dc in directions:
             new_row = row + dr
@@ -64,11 +63,11 @@ class Queen(Piece):
 
         return moves
 
-    def move_queen(self, move: str, board: List[List[str]]) -> bool:
+    def move_rook(self, move: str, board: List[List[str]]) -> bool:
         """
-        Выполняет ход ферзем, если он допустим.
+        Выполняет ход ладьёй, если он допустим.
 
-        :param move: Строка с ходом, например 'a4', 'b5Q' и т.д.
+        :param move: Строка с ходом, например 'a4', 'b5' и т.д.
         :param board: 8x8 матрица, представляющая шахматную доску.
         :return: True если ход выполнен, иначе False
         """
@@ -90,12 +89,10 @@ class Queen(Piece):
             if self._is_opponent_piece(target_piece):
                 print(f"Вражеская фигура {target_piece} взята.")
 
-        # Перемещаем ферзя на новую позицию
+        # Перемещаем ладью на новую позицию
         self.move((new_row, new_col), board)
 
+        # Устанавливаем флаг, что ладья уже двигалась
+        self.has_moved = True
+
         return True
-
-
-
-
-

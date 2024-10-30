@@ -1,10 +1,10 @@
 from typing import List, Tuple, Optional
-import Piece
-import Pawn
-import Knight
-import Bishop
-import Rook
-import Queen
+from game.pieces.piece import Piece
+from game.pieces.queen import Queen
+from game.pieces.rook import Rook
+from game.pieces.bishop import Bishop
+from game.pieces.knight import Knight
+from game.pieces.pawn import Pawn
 
 
 class King(Piece):
