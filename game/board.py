@@ -62,9 +62,4 @@ class Board:
                     if j == 4:
                         self.board[i][j] = King('black', (i, j))
 
-    def move(self, from_position: Tuple[int, int], to_position: Tuple[int, int]):
-        i, j = from_position
-        if self.board[i][j] is not None:
-            return self.board[i][j].move(to_position)
-        return False
 
