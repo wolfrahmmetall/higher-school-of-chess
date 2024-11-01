@@ -21,7 +21,7 @@ class ChessGame:
         elif from_square.color != self.turn:
             print("Can not move opponent's piece")
         else:
-            from_square.move(notation_to_index(to_position))
+            from_square.move(notation_to_index(to_position), self.board.board)
 
 
         
