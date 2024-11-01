@@ -1,5 +1,7 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
+from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
+
 class Queen(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
         """
@@ -18,15 +20,18 @@ class Queen(Piece):
         """
         return 'Q' if self.color == 'white' else 'q'
 
-    def show_possible_moves(self, board: List[List[str]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
+    def show_possible_moves(
+        self,
+        board: List[List[Optional[Piece]]],
+    ) -> List[str]:
         """
         Возвращает список возможных ходов для ферзя в текущей позиции.
 
         :param board: 8x8 матрица, представляющая шахматную доску.
-                      Пустые клетки обозначены '',
-                      белые фигуры начинаются с 'W', чёрные с 'B'.
+                      Пустые клетки обозначены None,
+                      фигуры представлены объектами наследниками класса Piece.
         :param last_move: Не используется для ферзя, добавлен для совместимости.
-        :return: Список строк с возможными ходами в формате 'a4', 'b5Q' и т.д.
+        :return: Список строк с возможными ходами в формате 'a4', 'b5' и т.д.
         """
         moves = []
         row, col = self.current_square
@@ -46,14 +51,14 @@ class Queen(Piece):
 
             while 0 <= new_row < 8 and 0 <= new_col < 8:
                 target_piece = board[new_row][new_col]
-                if target_piece == '':
+                if target_piece is None:
                     # Пустая клетка
-                    move = self._index_to_notation(new_row, new_col)
+                    move = index_to_notation(new_row, new_col)
                     moves.append(move)
                 else:
                     if self._is_opponent_piece(target_piece):
                         # Вражеская фигура может быть взята
-                        move = self._index_to_notation(new_row, new_col)
+                        move = index_to_notation(new_row, new_col)
                         moves.append(move)
                     # Если фигура своей, то дальше двигаться нельзя
                     break
@@ -64,11 +69,15 @@ class Queen(Piece):
 
         return moves
 
-    def move_queen(self, move: str, board: List[List[str]]) -> bool:
+    def move_piece(
+        self,
+        move: str,
+        board: List[List[Optional[Piece]]]
+    ) -> bool:
         """
         Выполняет ход ферзем, если он допустим.
 
-        :param move: Строка с ходом, например 'a4', 'b5Q' и т.д.
+        :param move: Строка с ходом, например 'a4', 'b5' и т.д.
         :param board: 8x8 матрица, представляющая шахматную доску.
         :return: True если ход выполнен, иначе False
         """
@@ -84,18 +93,16 @@ class Queen(Piece):
             print(f"Ошибка формата хода: {ve}")
             return False
 
-        # Проверка, занята ли клетка вражеской фигурой
         target_piece = board[new_row][new_col]
-        if target_piece != '':
+        if target_piece is not None:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece} взята.")
+                print(f"Вражеская фигура {target_piece.name()} взята.")
 
         # Перемещаем ферзя на новую позицию
-        self.move((new_row, new_col), board)
+        board[self.current_square[0]][self.current_square[1]] = None
+        board[new_row][new_col] = self
+        self.current_square = (new_row, new_col)
 
         return True
-
-
-
 
 

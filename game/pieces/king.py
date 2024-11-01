@@ -5,6 +5,7 @@ from game.pieces.rook import Rook
 from game.pieces.bishop import Bishop
 from game.pieces.knight import Knight
 from game.pieces.pawn import Pawn
+from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
 
 
 class King(Piece):
@@ -26,42 +27,51 @@ class King(Piece):
         """
         return 'K' if self.color == 'white' else 'k'
 
-    def show_possible_moves(self, board: List[List[str]], last_move: Optional[Tuple] = None) -> List[str]:
+    def show_possible_moves(
+        self,
+        board: List[List[Optional[Piece]]],
+        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[str]:
         """
         Возвращает список возможных ходов для короля в текущей позиции, включая рокировки.
 
         :param board: 8x8 матрица, представляющая шахматную доску.
-                      Пустые клетки обозначены '',
-                      белые фигуры начинаются с 'W', чёрные с 'B'.
+                      Пустые клетки обозначены None,
+                      фигуры представлены объектами наследниками класса Piece.
         :param last_move: Не используется для короля, добавлен для совместимости.
         :return: Список строк с возможными ходами в формате 'e2', 'f1', 'g1' (для рокировки) и т.д.
         """
         moves = []
         row, col = self.current_square
         directions = [(-1, -1), (-1, 0), (-1, 1),
-                      (0, -1), (0, 1),
-                      (1, -1), (1, 0), (1, 1)]
+                      (0, -1),          (0, 1),
+                      (1, -1), (1, 0),  (1, 1)]
+
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
             if 0 <= new_row < 8 and 0 <= new_col < 8:
                 target_piece = board[new_row][new_col]
-                if target_piece == '' or self._is_opponent_piece(target_piece):
+                if target_piece is None or self._is_opponent_piece(target_piece):
                     # Проверяем, что поле не под атакой
                     if not self.is_square_under_attack(board, new_row, new_col):
-                        moves.append(self._index_to_notation(new_row, new_col))
+                        moves.append(index_to_notation(new_row, new_col))
 
         # Проверка на рокировку
         if not self.has_moved and not self.is_in_check(board):
             # Короткая рокировка (kingside)
             if self.can_castle_short(board):
-                moves.append(self._index_to_notation(row, col + 2))
+                moves.append(index_to_notation(row, col + 2))
             # Длинная рокировка (queenside)
             if self.can_castle_long(board):
-                moves.append(self._index_to_notation(row, col - 2))
+                moves.append(index_to_notation(row, col - 2))
 
         return moves
 
-    def move_king(self, move: str, board: List[List[str]]) -> bool:
+    def move(
+        self,
+        move: str,
+        board: List[List[Optional[Piece]]]
+    ) -> bool:
         """
         Выполняет ход королём, если он допустим, включая рокировки.
 
@@ -81,11 +91,10 @@ class King(Piece):
             print(f"Ошибка формата хода: {ve}")
             return False
 
-        # Проверка, занята ли клетка вражеской фигурой
         target_piece = board[new_row][new_col]
-        if target_piece != '':
+        if target_piece is not None:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece} взята.")
+                print(f"Вражеская фигура {target_piece.name()} взята.")
 
         # Проверка на рокировку
         if abs(new_col - self.current_square[1]) == 2:
@@ -100,13 +109,22 @@ class King(Piece):
                 rook = self.get_rook(board, 'queenside')
                 if rook and not rook.has_moved:
                     self.castle(board, rook, 'queenside')
+            # Обновляем позицию короля после рокировки
+            board[self.current_square[0]][self.current_square[1]] = None
+            board[new_row][new_col] = self
+            self.current_square = (new_row, new_col)
+            self.has_moved = True
+            return True
 
         # Перемещаем короля на новую позицию
-        self.move((new_row, new_col), board)
+        board[self.current_square[0]][self.current_square[1]] = None
+        board[new_row][new_col] = self
+        self.current_square = (new_row, new_col)
         self.has_moved = True
+
         return True
 
-    def is_in_check(self, board: List[List[str]]) -> bool:
+    def is_in_check(self, board: List[List[Optional[Piece]]]) -> bool:
         """
         Проверяет, находится ли король под шахом.
 
@@ -116,7 +134,7 @@ class King(Piece):
         king_row, king_col = self.current_square
         return self.is_square_under_attack(board, king_row, king_col)
 
-    def is_square_under_attack(self, board: List[List[str]], target_row: int, target_col: int) -> bool:
+    def is_square_under_attack(self, board: List[List[Optional[Piece]]], target_row: int, target_col: int) -> bool:
         """
         Проверяет, атакуется ли заданная клетка на доске.
 
@@ -127,42 +145,20 @@ class King(Piece):
         """
         for row in range(8):
             for col in range(8):
-                piece_str = board[row][col]
-                if not piece_str:
+                piece = board[row][col]
+                if piece is None:
                     continue  # Пустая клетка
 
-                piece_color = 'white' if piece_str.startswith('W_') else 'black'
-                if piece_color == self.color:
+                if piece.color == self.color:
                     continue  # Не проверяем свои фигуры
 
-                piece_type = piece_str[2:].lower()
-
-                # Создаём экземпляр фигуры противника
-                if piece_type == 'p':
-                    opponent_piece = Pawn(color=piece_color, position=(row, col))
-                elif piece_type == 'n':
-                    opponent_piece = Knight(color=piece_color, position=(row, col))
-                elif piece_type == 'b':
-                    opponent_piece = Bishop(color=piece_color, position=(row, col))
-                elif piece_type == 'r':
-                    opponent_piece = Rook(color=piece_color, position=(row, col))
-                elif piece_type == 'q':
-                    opponent_piece = Queen(color=piece_color, position=(row, col))
-                elif piece_type == 'k':
-                    opponent_piece = King(color=piece_color, position=(row, col))
-                else:
-                    continue  # Неизвестная фигура
-
-                # Получаем возможные ходы фигуры противника
-                possible_moves = opponent_piece.show_possible_moves(board)
-
-                # Проверяем, атакует ли фигура короля
-                if self._index_to_notation(target_row, target_col) in possible_moves:
+                possible_moves = piece.show_possible_moves(board)
+                if index_to_notation(target_row, target_col) in possible_moves:
                     return True  # Клетка атакуется
 
         return False  # Клетка не атакуется
 
-    def can_castle_short(self, board: List[List[str]]) -> bool:
+    def can_castle_short(self, board: List[List[Optional[Piece]]]) -> bool:
         """
         Проверяет, может ли быть выполнена короткая рокировка.
 
@@ -176,7 +172,7 @@ class King(Piece):
             return False
         # Проверяем, свободны ли поля между королём и ладьёй
         for c in range(col + 1, rook_col):
-            if board[row][c] != '':
+            if board[row][c] is not None:
                 return False
         # Проверяем, что поля, через которые проходит король, не под атакой
         for c in range(col, col + 3):
@@ -184,7 +180,7 @@ class King(Piece):
                 return False
         return True
 
-    def can_castle_long(self, board: List[List[str]]) -> bool:
+    def can_castle_long(self, board: List[List[Optional[Piece]]]) -> bool:
         """
         Проверяет, может ли быть выполнена длинная рокировка.
 
@@ -198,7 +194,7 @@ class King(Piece):
             return False
         # Проверяем, свободны ли поля между королём и ладьёй
         for c in range(rook_col + 1, col):
-            if board[row][c] != '':
+            if board[row][c] is not None:
                 return False
         # Проверяем, что поля, через которые проходит король, не под атакой
         for c in range(col - 2, col + 1):
@@ -206,7 +202,7 @@ class King(Piece):
                 return False
         return True
 
-    def get_rook(self, board: List[List[str]], side: str):
+    def get_rook(self, board: List[List[Optional[Piece]]], side: str) -> Optional[Rook]:
         """
         Получает ладью для рокировки.
 
@@ -221,22 +217,16 @@ class King(Piece):
             rook_col = 0
         else:
             return None
-        piece_str = board[row][rook_col]
-        if not piece_str:
+        rook_piece = board[row][rook_col]
+        if not rook_piece or not isinstance(rook_piece, Rook):
             return None
-        piece_color = 'white' if piece_str.startswith('W_') else 'black'
-        if piece_color != self.color:
+        if rook_piece.color != self.color:
             return None
-        piece_type = piece_str[2:].lower()
-        if piece_type != 'r':
+        if rook_piece.has_moved:
             return None
-        # Предполагается, что вы храните ссылки на все фигуры
-        # Здесь необходимо получить объект ладьи, соответствующий позиции (row, rook_col)
-        # Например, через глобальный список или другой механизм хранения фигур
-        # Для примера возвращаем None
-        return None  # Замените на реальное получение объекта ладьи
+        return rook_piece
 
-    def castle(self, board: List[List[str]], rook: Rook, side: str) -> None:
+    def castle(self, board: List[List[Optional[Piece]]], rook: Rook, side: str) -> None:
         """
         Выполняет рокировку, перемещая короля и ладью.
 
@@ -257,20 +247,14 @@ class King(Piece):
             return
 
         # Перемещаем короля
-        board[row][col] = ''
-        board[row][new_king_col] = ('W_' if self.color == 'white' else 'B_') + self.name()
+        board[row][col] = None
+        board[row][new_king_col] = self
         self.current_square = (row, new_king_col)
         self.has_moved = True
 
         # Перемещаем ладью
-        rook_move_notation = self._index_to_notation(row, new_rook_col)
-        rook.move_rook(rook_move_notation, board)
+        board[row][rook.current_square[1]] = None
+        board[row][new_rook_col] = rook
+        rook.current_square = (row, new_rook_col)
+        rook.has_moved = True
 
-    def is_in_check(self, board: List[List[str]]) -> bool:
-        """
-        Проверяет, находится ли король под шахом.
-
-        :param board: 8x8 матрица, представляющая шахматную доску.
-        :return: True если король под шахом, иначе False
-        """
-        return self.is_square_under_attack(board, self.current_square[0], self.current_square[1])

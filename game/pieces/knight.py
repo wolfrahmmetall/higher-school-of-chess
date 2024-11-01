@@ -96,11 +96,3 @@ class Knight(Piece):
 
         return True
 
-    def _is_opponent_piece(self, piece: Piece) -> bool:
-        """
-        Проверяет, является ли фигура противником.
-
-        :param piece: Объект класса Piece, представляющий фигуру на доске
-        :return: True если фигура противника, иначе False
-        """
-        return piece.color != self.color
