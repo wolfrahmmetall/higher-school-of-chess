@@ -1,6 +1,0 @@
-[project]
-name="dbpackage"
-dynamic=["version"]
-
-[tool.setuptools]
-py-modules = []

@@ -1,7 +1,0 @@
-[project]
-name="pkgs"
-dynamic=["version"]
-readme="README.md"
-
-[tool.setuptools]
-py-modules = []

@@ -1,0 +1,13 @@
+[project]
+name="dbpackage"
+dynamic=["version"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find={}
+
+[tool.setuptools]
+py-modules = []

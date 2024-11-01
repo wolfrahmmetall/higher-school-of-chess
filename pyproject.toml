@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "higher-school-of-chess"
+version = "0.1.0"
+description = ""
+authors = ["wolfrahmmetall <narek.khoranyan@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.5"
+fastapi = "^0.115.4"
+SQLAlchemy = {extras = ["asyncio"], version = "^2.0.36"}
+asyncio = "^3.4.3"
+aiosqlite = "^0.20.0"
+psycopg2 = "^2.9.10"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+pydantic-settings = "^2.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
