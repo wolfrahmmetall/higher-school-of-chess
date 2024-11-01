@@ -30,6 +30,7 @@ class Board:
                 print(' ', end=' ')
                 for k in range(8):
                     print(letters[k], end=' ')
+                print("\n")
     
     def start_board(self):
         for i in range(8):

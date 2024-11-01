@@ -24,13 +24,18 @@ class Piece(ABC):
         return self.current_square
 
     @abstractmethod
-    def show_possible_moves(self, board: List[List[str]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
+    def show_possible_moves(
+        self,
+        board: List[List[Optional['Piece']]],
+        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[str]:
         """
         Возвращает список возможных ходов для фигуры в текущей позиции.
 
         :param board: 8x8 матрица, представляющая шахматную доску.
-                      Пустые клетки обозначены '',
-                      белые фигуры начинаются с 'W', чёрные с 'B'.
+                      Пустые клетки обозначены None,
+                      белые фигуры - экземпляры класса Piece с color='white',
+                      чёрные фигуры - экземпляры класса Piece с color='black'.
         :param last_move: Последний совершённый ход в формате ((from_row, from_col), (to_row, to_col), promotion_piece)
         :return: Список строк с возможными ходами в формате 'a4', 'b5Q' и т.д.
         """
@@ -61,7 +66,7 @@ class Piece(ABC):
         """
         self._is_tied = tied
 
-    def move(self, new_position: Tuple[int, int], board: List[List[str]]) -> None:
+    def move(self, new_position: Tuple[int, int], board: List[List[Optional['Piece']]]) -> None:
         """
         Перемещает фигуру на новую позицию на доске.
 
@@ -72,23 +77,27 @@ class Piece(ABC):
         new_row, new_col = new_position
 
         # Удаление фигуры с текущей позиции
-        board[current_row][current_col] = ''
+        board[current_row][current_col] = None
+
+        # Захват фигуры на новой позиции, если есть
+        captured_piece = board[new_row][new_col]
+        if captured_piece:
+            # Здесь можно обработать захват фигуры, например, добавить её в список сбитых
+            pass  # Реализация зависит от общей логики игры
 
         # Установка фигуры на новую позицию
-        board[new_row][new_col] = ('W_' if self.color == 'white' else 'B_') + self.name()
+        board[new_row][new_col] = self
 
         # Обновление позиции фигуры
         self.current_square = new_position
-    def _is_opponent_piece(self, piece: str) -> bool:
+
+    def _is_opponent_piece(self, piece: Optional['Piece']) -> bool:
         """
         Проверяет, является ли фигура противником.
 
-        :param piece: Строка, представляющая фигуру на доске
+        :param piece: Объект Piece или None, представляющий фигуру на доске
         :return: True если фигура противника, иначе False
         """
-        if not piece:
+        if piece is None:
             return False
-        if self.color == 'white':
-            return piece.startswith('B')
-        else:
-            return piece.startswith('W')
+        return self.color != piece.color

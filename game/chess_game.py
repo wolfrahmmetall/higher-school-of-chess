@@ -21,7 +21,17 @@ class ChessGame:
         elif from_square.color != self.turn:
             print("Can not move opponent's piece")
         else:
-            from_square.move(notation_to_index(to_position), self.board.board)
+            try:
+                to_position_index = tuple(notation_to_index(to_position))
+                from_square.move(to_position_index, self.board.board)
+                if self.turn == "white":
+                    self.turn = "black"
+                else:
+                    self.turn = "white"
+            except ValueError as ve:
+                print(f"Ошибка формата хода: {ve}")
+        self.board.print_board()
+
 
 
         

@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
+from game.index_notation import index_to_notation
 
 class Knight(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
@@ -13,19 +14,19 @@ class Knight(Piece):
 
     def name(self) -> str:
         """
-        Возвращает обозначение пешки.
+        Возвращает обозначение коня.
 
-        :return: 'P' для белой пешки, 'p' для чёрной пешки.
+        :return: 'N' для белого коня, 'n' для чёрного коня.
         """
         return 'N' if self.color == 'white' else 'n'
 
-    def show_possible_moves(self, board: List[List[str]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
+    def show_possible_moves(self, board: List[List[Optional[Piece]]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
         """
         Возвращает список возможных ходов для коня в текущей позиции.
 
         :param board: 8x8 матрица, представляющая шахматную доску.
-                      Пустые клетки обозначены '',
-                      белые фигуры начинаются с 'W', чёрные с 'B'.
+                      Пустые клетки обозначены None,
+                      фигуры представлены объектами наследниками класса Piece.
         :param last_move: Не используется для коня, добавлен для совместимости.
         :return: Список строк с возможными ходами в формате 'f3', 'g5' и т.д.
         """
@@ -55,20 +56,20 @@ class Knight(Piece):
             # Проверяем, находится ли новая позиция на доске
             if 0 <= new_row < 8 and 0 <= new_col < 8:
                 target_piece = board[new_row][new_col]
-                if target_piece == '':
+                if target_piece is None:
                     # Пустая клетка
-                    move = self._index_to_notation(new_row, new_col)
+                    move = index_to_notation(new_row, new_col)
                     moves.append(move)
                 else:
                     # Проверяем, принадлежит ли фигура противнику
                     if self._is_opponent_piece(target_piece):
-                        move = self._index_to_notation(new_row, new_col)
+                        move = index_to_notation(new_row, new_col)
                         moves.append(move)
                     # Если фигура своей, ход невозможен
 
         return moves
 
-    def move(self, move: str, board: List[List[str]]) -> bool:
+    def move(self, move: Tuple[int, int], board: List[List[Optional[Piece]]]) -> bool:
         """
         Выполняет ход конем, если он допустим.
 
@@ -81,18 +82,11 @@ class Knight(Piece):
             print("Недопустимый ход.")
             return False
 
-        # Преобразование нотации хода в индексы
-        try:
-            new_row, new_col = self._notation_to_index(move)
-        except ValueError as ve:
-            print(f"Ошибка формата хода: {ve}")
-            return False
-
-        # Проверка, занята ли клетка вражеской фигурой
+        new_row, new_col = move
         target_piece = board[new_row][new_col]
-        if target_piece != '':
+        if target_piece is not None:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece} взята.")
+                print(f"Вражеская фигура {target_piece.name()} взята.")
             else:
                 # Это условие уже покрыто в show_possible_moves
                 pass
@@ -101,16 +95,12 @@ class Knight(Piece):
         self.move((new_row, new_col), board)
 
         return True
-    def _is_opponent_piece(self, piece: str) -> bool:
+
+    def _is_opponent_piece(self, piece: Piece) -> bool:
         """
         Проверяет, является ли фигура противником.
-        Наследуется из базового класса Piece.
 
-        :param piece: Строка, представляющая фигуру на доске
+        :param piece: Объект класса Piece, представляющий фигуру на доске
         :return: True если фигура противника, иначе False
         """
-        return super()._is_opponent_piece(piece)
-
-
-
-
+        return piece.color != self.color
