@@ -8,6 +8,13 @@ from game.index_notation import index_to_notation  # Предполагаетс�
 
 
 class Pawn(Piece):
+    def name(self) -> str:
+        """
+        Возвращает обозначение коня.
+
+        :return: 'N' для белого коня, 'n' для чёрного коня.
+        """
+        return 'P' if self.color == 'white' else 'p'
     def move(
             self,
             move: Tuple[int, int],
