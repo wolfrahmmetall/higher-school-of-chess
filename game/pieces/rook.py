@@ -71,13 +71,13 @@ class Rook(Piece):
 
     def move(
         self,
-        move: str,
-        board: List[List[Optional[Piece]]]
+        move: Tuple[int, int],
+        board: List[List[Optional['Piece']]]
     ) -> bool:
         """
         Выполняет ход ладьёй, если он допустим.
 
-        :param move: Строка с ходом, например 'a4', 'b5' и т.д.
+        :param move: Кортеж с ходом, например (0, 0), (0, 7) и т.д., где первый элемент — строка, второй — столбец.
         :param board: 8x8 матрица, представляющая шахматную доску.
         :return: True если ход выполнен, иначе False
         """
@@ -86,17 +86,14 @@ class Rook(Piece):
             print("Недопустимый ход.")
             return False
 
-        # Преобразование нотации хода в индексы
-        try:
-            new_row, new_col = self._notation_to_index(move)
-        except ValueError as ve:
-            print(f"Ошибка формата хода: {ve}")
-            return False
-
+        new_row, new_col = move
         target_piece = board[new_row][new_col]
         if target_piece is not None:
             if self._is_opponent_piece(target_piece):
                 print(f"Вражеская фигура {target_piece.name()} взята.")
+            else:
+                # Это условие уже покрыто в show_possible_moves
+                pass
 
         # Перемещаем ладью на новую позицию
         board[self.current_square[0]][self.current_square[1]] = None
@@ -106,5 +103,53 @@ class Rook(Piece):
         # Устанавливаем флаг, что ладья уже двигалась
         self.has_moved = True
 
+        print(f"Ладья перемещена на {self.index_to_notation(new_row, new_col)}.")
         return True
+
+    def show_possible_moves(self, board: List[List['Piece']]) -> List[Tuple[int, int]]:
+        """
+        Возвращает список допустимых ходов для ладьи.
+
+        :param board: Текущая шахматная доска.
+        :return: Список кортежей с допустимыми ходами (new_row, new_col).
+        """
+        possible_moves = []
+        row, col = self.current_square
+
+        # Направления движения ладьи: вертикаль и горизонталь
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        for dr, dc in directions:
+            current_row, current_col = row + dr, col + dc
+            while 0 <= current_row < 8 and 0 <= current_col < 8:
+                target_piece = board[current_row][current_col]
+                if target_piece is None:
+                    possible_moves.append((current_row, current_col))
+                else:
+                    if self._is_opponent_piece(target_piece):
+                        possible_moves.append((current_row, current_col))
+                    break  # Не может прыгать через фигуры
+                current_row += dr
+                current_col += dc
+
+        return possible_moves
+
+    def _is_opponent_piece(self, piece: 'Piece') -> bool:
+        """
+        Проверяет, принадлежит ли фигура противнику.
+
+        :param piece: Фигура для проверки.
+        :return: True если фигура принадлежит противнику, иначе False.
+        """
+        return piece.color != self.color
+
+    def index_to_notation(self, row: int, col: int) -> str:
+        """
+        Преобразует индексы доски в шахматную нотацию.
+
+        :param row: Строка на доске (0-7).
+        :param col: Столбец на доске (0-7).
+        :return: Строка в шахматной нотации, например 'a4'.
+        """
+        return chr(col + ord('a')) + str(8 - row)
 

@@ -69,15 +69,15 @@ class Queen(Piece):
 
         return moves
 
-    def move_piece(
-        self,
-        move: str,
-        board: List[List[Optional[Piece]]]
+    def move(
+            self,
+            move: Tuple[int, int],
+            board: List[List[Optional['Piece']]]
     ) -> bool:
         """
         Выполняет ход ферзем, если он допустим.
 
-        :param move: Строка с ходом, например 'a4', 'b5' и т.д.
+        :param move: Кортеж с ходом, например (0, 3), (4, 7) и т.д., где первый элемент — строка, второй — столбец.
         :param board: 8x8 матрица, представляющая шахматную доску.
         :return: True если ход выполнен, иначе False
         """
@@ -86,17 +86,14 @@ class Queen(Piece):
             print("Недопустимый ход.")
             return False
 
-        # Преобразование нотации хода в индексы
-        try:
-            new_row, new_col = self._notation_to_index(move)
-        except ValueError as ve:
-            print(f"Ошибка формата хода: {ve}")
-            return False
-
+        new_row, new_col = move
         target_piece = board[new_row][new_col]
         if target_piece is not None:
             if self._is_opponent_piece(target_piece):
                 print(f"Вражеская фигура {target_piece.name()} взята.")
+            else:
+                # Это условие уже покрыто в show_possible_moves
+                pass
 
         # Перемещаем ферзя на новую позицию
         board[self.current_square[0]][self.current_square[1]] = None
