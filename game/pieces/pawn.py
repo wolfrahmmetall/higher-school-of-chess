@@ -4,10 +4,14 @@ from game.pieces.queen import Queen
 from game.pieces.rook import Rook
 from game.pieces.knight import Knight
 from game.pieces.bishop import Bishop
-from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
 
 
 class Pawn(Piece):
+    def __init__(self, color: str, position: Tuple[int, int]):
+        super().__init__(color, position)
+        self.en_passant_available = None
+        self.already_moved = None
+
     def name(self) -> str:
         """
         Возвращает обозначение коня.
@@ -15,6 +19,7 @@ class Pawn(Piece):
         :return: 'N' для белого коня, 'n' для чёрного коня.
         """
         return 'P' if self.color == 'white' else 'p'
+
     def move(
             self,
             move: Tuple[int, int],
@@ -55,7 +60,7 @@ class Pawn(Piece):
             captured_piece = board[captured_row][captured_col]
             if captured_piece and isinstance(captured_piece, Pawn) and captured_piece.color != self.color:
                 board[captured_row][captured_col] = None
-                print(f"Пешка на {self.index_to_notation(captured_row, captured_col)} взята на проходе.")
+
             else:
                 print("Ошибка: Нет пешки для взятия на проходе.")
                 return False
@@ -136,11 +141,11 @@ class Pawn(Piece):
         return False
 
     def _promote(
-        self,
-        board: List[List['Piece']],
-        new_row: int,
-        new_col: int,
-        promotion_choice: Optional[str] = 'Q'
+            self,
+            board: List[List['Piece']],
+            new_row: int,
+            new_col: int,
+            promotion_choice: Optional[str] = 'Q'
     ):
         """
         Превращает пешку в указанную фигуру. Поддерживаются ферзь, ладья, слон и конь.
@@ -175,11 +180,11 @@ class Pawn(Piece):
         # Удаляем пешку с доски
         board[self.current_square[0]][self.current_square[1]] = None
 
-        print(f"Пешка на {self.index_to_notation(new_row, new_col)} превращена в {promoted_piece.name()}.")
-
-    def show_possible_moves(self, board: List[List['Piece']],
-                            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[
-        Tuple[int, int]]:
+    def show_possible_moves(
+            self,
+            board: List[List[Optional['Piece']]],
+            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[Tuple[int, int]]:
         """
         Возвращает список допустимых ходов для пешки, учитывая текущее состояние доски и последний ход.
 
@@ -231,6 +236,3 @@ class Pawn(Piece):
         """
         # Реализуйте логику проверки связности фигуры
         return False
-
-
-

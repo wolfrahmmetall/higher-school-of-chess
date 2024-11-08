@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
-from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
+
 
 class Bishop(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
@@ -20,7 +20,11 @@ class Bishop(Piece):
         """
         return 'B' if self.color == 'white' else 'b'
 
-    def show_possible_moves(self, board: List[List[Optional[Piece]]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
+    def show_possible_moves(
+            self,
+            board: List[List[Optional['Piece']]],
+            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[Tuple[int, int]]:
         """
         Возвращает список возможных ходов для слона в текущей позиции.
 
@@ -48,12 +52,12 @@ class Bishop(Piece):
                 target_piece = board[new_row][new_col]
                 if target_piece is None:
                     # Пустая клетка
-                    move = index_to_notation(new_row, new_col)
+                    move = (new_row, new_col)
                     moves.append(move)
                 else:
                     if self._is_opponent_piece(target_piece):
                         # Вражеская фигура может быть взята
-                        move = index_to_notation(new_row, new_col)
+                        move = (new_row, new_col)
                         moves.append(move)
                     # Если фигура своей, то дальше двигаться нельзя
                     break
@@ -89,11 +93,6 @@ class Bishop(Piece):
                 pass
 
         # Перемещаем слона на новую позицию
-        board[self.current_square[0]][self.current_square[1]] = None
-        board[new_row][new_col] = self
-        self.current_square = (new_row, new_col)
+        super().move((new_row, new_col), board)
 
         return True
-
-
-

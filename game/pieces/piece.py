@@ -1,6 +1,7 @@
 from typing import List, Tuple, Optional
 from abc import ABC, abstractmethod
 
+
 class Piece(ABC):
     def __init__(self, color: str, position: Tuple[int, int]):
         """
@@ -25,10 +26,10 @@ class Piece(ABC):
 
     @abstractmethod
     def show_possible_moves(
-        self,
-        board: List[List[Optional['Piece']]],
-        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
-    ) -> List[str]:
+            self,
+            board: List[List[Optional['Piece']]],
+            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[Tuple[int, int]]:
         """
         Возвращает список возможных ходов для фигуры в текущей позиции.
 

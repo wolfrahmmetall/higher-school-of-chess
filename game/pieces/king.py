@@ -1,7 +1,6 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
 from game.pieces.rook import Rook
-from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
 
 
 class King(Piece):
@@ -25,11 +24,13 @@ class King(Piece):
 
     def show_possible_moves(
         self,
-        board: List[List[Optional[Piece]]]
+        board: List[List[Optional['Piece']]],
+        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
     ) -> List[Tuple[int, int]]:
         """
         Возвращает список возможных ходов для короля в текущей позиции, включая рокировки.
 
+        :param last_move:
         :param board: 8x8 матрица, представляющая шахматную доску.
                       Пустые клетки обозначены None,
                       фигуры представлены объектами наследниками класса Piece.
@@ -38,8 +39,8 @@ class King(Piece):
         moves = []
         row, col = self.current_square
         directions = [(-1, -1), (-1, 0), (-1, 1),
-                      (0, -1),          (0, 1),
-                      (1, -1),  (1, 0), (1, 1)]
+                      (0, -1), (0, 1),
+                      (1, -1), (1, 0), (1, 1)]
 
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
@@ -62,9 +63,9 @@ class King(Piece):
         return moves
 
     def move(
-        self,
-        move: Tuple[int, int],
-        board: List[List[Optional['Piece']]]
+            self,
+            move: Tuple[int, int],
+            board: List[List[Optional['Piece']]]
     ) -> bool:
         """
         Выполняет ход королём, если он допустим, включая рокировки.
@@ -120,7 +121,6 @@ class King(Piece):
         self.current_square = (new_row, new_col)
         self.has_moved = True
 
-        print(f"Король перемещён на {self.index_to_notation(new_row, new_col)}.")
         return True
 
     def get_rook(self, board: List[List[Optional[Piece]]], side: str) -> Optional[Rook]:
@@ -178,18 +178,6 @@ class King(Piece):
         board[row][new_rook_col] = rook
         rook.current_square = (row, new_rook_col)
         rook.has_moved = True
-
-        print(f"Ладья перемещена на {rook.index_to_notation(rook.current_square[0], rook.current_square[1])}.")
-
-    def index_to_notation(self, row: int, col: int) -> str:
-        """
-        Преобразует индексы доски в шахматную нотацию.
-
-        :param row: Строка на доске (0-7).
-        :param col: Столбец на доске (0-7).
-        :return: Строка в шахматной нотации, например 'e4'.
-        """
-        return chr(col + ord('a')) + str(8 - row)
 
     def is_in_check(self, board: List[List[Optional[Piece]]]) -> bool:
         """
@@ -291,4 +279,3 @@ class King(Piece):
             if self.is_square_under_attack(board, row, c):
                 return False
         return True
-

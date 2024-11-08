@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
-from game.index_notation import index_to_notation  # Предполагается, что этот модуль существует
+
 
 class Rook(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
@@ -22,10 +22,10 @@ class Rook(Piece):
         return 'R' if self.color == 'white' else 'r'
 
     def show_possible_moves(
-        self,
-        board: List[List[Optional[Piece]]],
-        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
-    ) -> List[str]:
+            self,
+            board: List[List[Optional[Piece]]],
+            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+    ) -> List[Tuple[int, int]]:
         """
         Возвращает список возможных ходов для ладьи в текущей позиции.
 
@@ -53,12 +53,12 @@ class Rook(Piece):
                 target_piece = board[new_row][new_col]
                 if target_piece is None:
                     # Пустая клетка
-                    move = index_to_notation(new_row, new_col)
+                    move = (new_row, new_col)
                     moves.append(move)
                 else:
                     if self._is_opponent_piece(target_piece):
                         # Вражеская фигура может быть взята
-                        move = index_to_notation(new_row, new_col)
+                        move = (new_row, new_col)
                         moves.append(move)
                     # Если фигура своей, то дальше двигаться нельзя
                     break
@@ -70,9 +70,9 @@ class Rook(Piece):
         return moves
 
     def move(
-        self,
-        move: Tuple[int, int],
-        board: List[List[Optional['Piece']]]
+            self,
+            move: Tuple[int, int],
+            board: List[List[Optional['Piece']]]
     ) -> bool:
         """
         Выполняет ход ладьёй, если он допустим.
@@ -103,36 +103,7 @@ class Rook(Piece):
         # Устанавливаем флаг, что ладья уже двигалась
         self.has_moved = True
 
-        print(f"Ладья перемещена на {self.index_to_notation(new_row, new_col)}.")
         return True
-
-    def show_possible_moves(self, board: List[List['Piece']]) -> List[Tuple[int, int]]:
-        """
-        Возвращает список допустимых ходов для ладьи.
-
-        :param board: Текущая шахматная доска.
-        :return: Список кортежей с допустимыми ходами (new_row, new_col).
-        """
-        possible_moves = []
-        row, col = self.current_square
-
-        # Направления движения ладьи: вертикаль и горизонталь
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-
-        for dr, dc in directions:
-            current_row, current_col = row + dr, col + dc
-            while 0 <= current_row < 8 and 0 <= current_col < 8:
-                target_piece = board[current_row][current_col]
-                if target_piece is None:
-                    possible_moves.append((current_row, current_col))
-                else:
-                    if self._is_opponent_piece(target_piece):
-                        possible_moves.append((current_row, current_col))
-                    break  # Не может прыгать через фигуры
-                current_row += dr
-                current_col += dc
-
-        return possible_moves
 
     def _is_opponent_piece(self, piece: 'Piece') -> bool:
         """
@@ -142,14 +113,3 @@ class Rook(Piece):
         :return: True если фигура принадлежит противнику, иначе False.
         """
         return piece.color != self.color
-
-    def index_to_notation(self, row: int, col: int) -> str:
-        """
-        Преобразует индексы доски в шахматную нотацию.
-
-        :param row: Строка на доске (0-7).
-        :param col: Столбец на доске (0-7).
-        :return: Строка в шахматной нотации, например 'a4'.
-        """
-        return chr(col + ord('a')) + str(8 - row)
-

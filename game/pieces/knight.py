@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
 from game.pieces.piece import Piece
-from game.index_notation import index_to_notation
+
 
 class Knight(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
@@ -20,7 +20,9 @@ class Knight(Piece):
         """
         return 'N' if self.color == 'white' else 'n'
 
-    def show_possible_moves(self, board: List[List[Optional[Piece]]], last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[str]:
+    def show_possible_moves(self, board: List[List[Optional[Piece]]],
+                            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[
+        Tuple[int, int]]:
         """
         Возвращает список возможных ходов для коня в текущей позиции.
 
@@ -58,12 +60,12 @@ class Knight(Piece):
                 target_piece = board[new_row][new_col]
                 if target_piece is None:
                     # Пустая клетка
-                    move = index_to_notation(new_row, new_col)
+                    move = (new_row, new_col)
                     moves.append(move)
                 else:
                     # Проверяем, принадлежит ли фигура противнику
                     if self._is_opponent_piece(target_piece):
-                        move = index_to_notation(new_row, new_col)
+                        move = (new_row, new_col)
                         moves.append(move)
                     # Если фигура своей, ход невозможен
 
@@ -92,7 +94,6 @@ class Knight(Piece):
                 pass
 
         # Перемещаем коня на новую позицию
-        self.move((new_row, new_col), board)
+        super().move((new_row, new_col), board)
 
         return True
-
