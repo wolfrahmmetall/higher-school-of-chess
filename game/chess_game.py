@@ -68,9 +68,6 @@ class ChessGame:
         else:
             self.result = "draw"
 
-a = ChessGame(1, 1)
-a.start_game()
-a.move("b2", "b3")
         
     
 
