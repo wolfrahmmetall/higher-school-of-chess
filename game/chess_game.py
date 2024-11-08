@@ -29,17 +29,19 @@ class ChessGame:
         else:
             try:
                 to_position_index = tuple(notation_to_index(to_position))
-                if type(from_square) == King and from_square.move(to_position_index, self.board.board):
+                to_square = self.board.board[to_position_index[0]][to_position_index[1]]
+                if from_square.move(to_position_index, self.board.board):
+                    if type(to_square) == King:
+                        if self.turn == "white":
+                            self.white_king = to_position_index
+                        else:
+                            self.black_king = to_position_index
                     if self.turn == "white":
-                        self.white_king = to_position_index
+                        self.turn = "black"
+                        # self.game_over("black")
                     else:
-                        self.black_king = to_position_index
-                if self.turn == "white":
-                    self.turn = "black"
-                    self.game_over("black")
-                else:
-                    self.turn = "white"
-                    self.game_over("white")
+                        self.turn = "white"
+                        # self.game_over("white")
             except ValueError as ve:
                 print(f"Ошибка формата хода: {ve}")
         self.board.print_board()
@@ -65,7 +67,6 @@ class ChessGame:
                 self.result = "white"
         else:
             self.result = "draw"
-
 
         
     
