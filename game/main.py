@@ -6,6 +6,6 @@ print("Enter increment (s): ")
 increment = int(input())
 game = ChessGame(game_time, increment)
 game.start_game()
-print(game.result)
+print(f"Game result: {game.result}")
 
 

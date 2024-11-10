@@ -17,12 +17,12 @@ class Board:
             for j in range(8):
                 if j!=7:
                     if self.board[i][j] is None:
-                        print('0', end=' ')
+                        print('\uA900', end=' ')
                     else:
                         print(self.board[i][j].name(), end=' ')
                 else:
                     if self.board[i][j] is None:
-                        print('0')
+                        print('\uA900')
                     else:
                         print(self.board[i][j].name())
             if i == 7:
