@@ -9,20 +9,23 @@ from game.pieces.rook import Rook
 
 class Board:
     def __init__(self) -> None:
-        self.board: list[list[None or Piece]] = [[None for _ in range(8)] for _ in range(8)]
+        self.board: list[list[Piece | None]] = [[None for _ in range(8)] for _ in range(8)]
+
+    def __getitem__(self, item: (int, int)) -> Piece | None:
+        return self.board[item[0]][item[1]]
 
     def print_board(self):
         for i in range(8):
-            print(8-i, end='|')
+            print(8 - i, end='|')
             for j in range(8):
-                if j!=7:
+                if j != 7:
                     if self.board[i][j] is None:
-                        print('0', end=' ')
+                        print('\uA900', end=' ')
                     else:
                         print(self.board[i][j].name(), end=' ')
                 else:
                     if self.board[i][j] is None:
-                        print('0')
+                        print('\uA900')
                     else:
                         print(self.board[i][j].name())
             if i == 7:
@@ -31,7 +34,7 @@ class Board:
                 for k in range(8):
                     print(letters[k], end=' ')
                 print("\n")
-    
+
     def start_board(self):
         for i in range(8):
             for j in range(8):
@@ -61,5 +64,3 @@ class Board:
                         self.board[i][j] = Queen('black', (i, j))
                     if j == 4:
                         self.board[i][j] = King('black', (i, j))
-
-
