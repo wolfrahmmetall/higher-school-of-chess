@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
-from pathlib import Path
 
 from pkgs.config import settings
 from dbpackage.DBHelper import db_helper
 from dbpackage.Base import Base
-from dbpackage.Password import Password
 from api_v1 import router as router_v1
 import uvicorn
 
@@ -20,6 +18,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=router_v1, prefix=settings.api_v1_prefix)
+
 @app.get('/')
 def hello_api():
     return {'msg':'hello_api'}

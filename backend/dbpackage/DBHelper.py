@@ -20,12 +20,18 @@ class DatabaseHelper:
     def get_scoped_session(self):
         session = async_scoped_session(
             session_factory=self.session_factory,
-            scopefunc=current_task()
+            scopefunc=current_task
         )
         return session
     
     async def session_dependency(self) -> AsyncGenerator[Any, Any]:
-        async with self.get_scoped_session() as session:
-            yield session
-            await session.remove()
+        session = self.get_scoped_session()
+        yield session
+        await session.close()
+
+    async def scoped_session_dependency(self) -> AsyncGenerator[async_scoped_session, Any]:
+        session = self.get_scoped_session()
+        yield session
+        await session.close()
+
 db_helper = DatabaseHelper(url=settings.DATABASE_NAME, echo=settings.DATABASE_ECHO)
