@@ -1,7 +1,10 @@
+import copy
+
 import pytest
 import unittest
 
 from game.pieces.king import King
+from game.pieces.piece import Piece
 from game.pieces.queen import Queen
 from game.pieces.rook import Rook
 from game.pieces.bishop import Bishop
@@ -63,5 +66,70 @@ class TestPiece(unittest.TestCase):
             piece_n = Knight("white", (100, 10))
         with pytest.raises(ValueError):
             piece_p = Pawn("black", (1, 9))
+
+
+class TestKnight(unittest.TestCase):
+    board: list[list[Piece | None]] = [
+        [None for _ in range(8)] for _ in range(8)
+    ]
+
+    def test_valid_move_to_empty_square(self):
+        knight_moves = [
+            (2, 1),
+            (1, 2),
+            (-1, 2),
+            (-2, 1),
+            (-2, -1),
+            (-1, -2),
+            (1, -2),
+            (2, -1)
+        ]
+        board = copy.deepcopy(self.board)
+        board[4][4] = Knight("white", (4, 4))
+        for dr, dc in knight_moves:
+            board_1 = copy.deepcopy(board)
+            assert board_1[4][4].move((4 + dr, 4 + dc), board_1)
+            assert board_1[4][4] is None
+            assert type(board_1[4+dr][4+dc]) == Knight
+
+    def test_move_to_square_with_enemy(self):
+        board = copy.deepcopy(self.board)
+        board[4][4] = Knight("white", (4, 4))
+        board[5][6] = Pawn("black", (5, 6))
+        assert board[4][4].move((5, 6), board)
+        assert board[4][4] is None
+        assert type(board[5][6]) == Knight
+
+    def test_move_to_square_with_ally(self):
+        board = copy.deepcopy(self.board)
+        board[4][4] = Knight("white", (4, 4))
+        board[5][6] = Pawn("white", (5, 6))
+        assert not board[4][4].move((5, 6), board)
+        assert type(board[4][4]) == Knight
+        assert type(board[5][6]) == Pawn
+
+    def test_invalid_move(self):
+        board = copy.deepcopy(self.board)
+        board[4][4] = Knight("white", (4, 4))
+        assert not board[4][4].move((4, 4), board)
+        assert type(board[4][4]) == Knight
+        assert not board[4][4].move((4, 6), board)
+        assert type(board[4][4]) == Knight
+        assert not board[4][4].move((4, 3), board)
+        assert type(board[4][4]) == Knight
+        assert not board[4][4].move((5, 5), board)
+        assert type(board[4][4]) == Knight
+        assert not board[4][4].move((7, 2), board)
+        assert type(board[4][4]) == Knight
+        assert not board[4][4].move((0, 0), board)
+        assert type(board[4][4]) == Knight
+
+    def test_move_out_of_board(self):
+        board = copy.deepcopy(self.board)
+        board[1][1] = Knight("white", (1, 1))
+        assert not board[1][1].move((-1, 0), board)
+        assert type(board[1][1]) == Knight
+        assert not board[1][1].move((0, -1), board)
+        assert not board[1][1].move((-1, -1), board)
 
 
