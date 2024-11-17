@@ -16,7 +16,6 @@ class ChessGame:
         self.increment = increment
         self.current_player_color: PieceColor = "white"
         self.board_main = Board()
-        self.board_sup = Board()
         self.white_king = (7, 4)
         self.black_king = (0, 4)
         self.result = None
@@ -26,7 +25,6 @@ class ChessGame:
 
     def start_game(self) -> None:
         self.board_main.start_board()
-        self.board_sup.start_board()
         self.board_main.print_board()
         while self.result is None:
             print(f"{self.current_player_color}'s turn")
@@ -55,22 +53,26 @@ class ChessGame:
         except ValueError as ve:
             print(f"Ошибка формата клетки: {ve}")
             return []
-        from_square = self.board_sup[from_position_index]
+        board = deepcopy(self.board_main)
+        from_square = board[from_position_index]
         if from_square is None:
             return []
         elif from_square.color != self.current_player_color:
             return []
         else:
-            uncut_possible_moves = from_square.show_possible_moves(self.board_sup.board)
+            board_sup = deepcopy(board)
+            uncut_possible_moves = from_square.show_possible_moves(board_sup.board)
             possible_moves = []
             for move in uncut_possible_moves:
-                from_square.move(move, self.board_sup.board)
+                from_square.move(move, board_sup.board)
+                print("BOARD_SUP")
+                board_sup.print_board()
                 if self.current_player_color == "white":
-                    if not cast(King, self.board_sup[self.white_king]).is_in_check(self.board_sup.board):
+                    if not cast(King, board_sup[self.white_king]).is_in_check(board_sup.board):
                         possible_moves.append(move)
-                elif not cast(King, self.board_sup[self.black_king]).is_in_check(self.board_sup.board):
+                elif not cast(King, board_sup[self.black_king]).is_in_check(board_sup.board):
                         possible_moves.append(move)
-                self.board_sup.board = deepcopy(self.board_main.board)
+
             return possible_moves
 
 
