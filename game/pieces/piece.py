@@ -12,6 +12,16 @@ class Piece(ABC):
         """
         if color.lower() not in ['white', 'black']:
             raise ValueError("Color must be 'white' or 'black'")
+
+        if (not isinstance(position, tuple) or
+                len(position) != 2 or
+                not all(isinstance(coord, int) for coord in position)):
+            raise ValueError("Position must be a tuple of two integers")
+
+        row, column = position
+        if not (0 <= row <= 7 and 0 <= column <= 7):
+            raise ValueError("Position coordinates must be between 0 and 7 inclusive")
+
         self.color = color.lower()
         self.current_square = position  # (row, column)
         self._is_tied = False  # Изначально фигура не связана
