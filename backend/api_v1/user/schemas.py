@@ -1,25 +1,31 @@
-from datetime import date
-from typing import Annotated
-from annotated_types import MaxLen, MinLen
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 class UserBase(BaseModel):
     login : str #equivalent to UID. To be used that way 
-    # TODO: update the key to be an uuid, login is to be used as a mean to get it
-    email : str
-    elo_score : float
-
-    
+    password : str
+    email : EmailStr
+    elo_score : float | None
 
 class CreateUser(UserBase):
-    ...
+    elo_score: float = 1000
 
 class UpdateUser(CreateUser):
     ...
 
+class LoginUser(BaseModel):
+    login : str
+    password : str
 
 class UserUpdatePartial(CreateUser):
     name: str | None = None
 
 class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
+    
+class UserSchema(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    username: str
+    password: bytes
+    email: EmailStr | None = None
+    active: bool = True
