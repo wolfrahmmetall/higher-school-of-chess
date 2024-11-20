@@ -4,6 +4,9 @@ from typing import Union, Literal, cast
 from board import Board
 from game.index_notation import index_to_notation
 from game.pieces.king import King
+from game.pieces.pawn import Pawn
+from game.pieces.piece import Piece
+from game.pieces.rook import Rook
 from index_notation import notation_to_index
 
 PieceColor = Union[Literal["white"], Literal["black"]]
@@ -15,7 +18,7 @@ class ChessGame:
         self.black_timer = game_time
         self.increment = increment
         self.current_player_color: PieceColor = "white"
-        self.board_main = Board()
+        self.board = Board()
         self.white_king = (7, 4)
         self.black_king = (0, 4)
         self.result = None
@@ -24,8 +27,8 @@ class ChessGame:
         self.current_player_color = "black" if self.current_player_color == "white" else "white"
 
     def start_game(self) -> None:
-        self.board_main.start_board()
-        self.board_main.print_board()
+        self.board.start_board()
+        self.board.print_board()
         while self.result is None:
             print(f"{self.current_player_color}'s turn")
             args = input().split()
@@ -53,27 +56,55 @@ class ChessGame:
         except ValueError as ve:
             print(f"Ошибка формата клетки: {ve}")
             return []
-        board = deepcopy(self.board_main)
-        from_square = board[from_position_index]
+        from_square = self.board[from_position_index]
         if from_square is None:
             return []
         elif from_square.color != self.current_player_color:
             return []
         else:
-            board_sup = deepcopy(board)
-            uncut_possible_moves = from_square.show_possible_moves(board_sup.board)
+            uncut_possible_moves = from_square.show_possible_moves(self.board.board)
             possible_moves = []
             for move in uncut_possible_moves:
-                from_square.move(move, board_sup.board)
-                print("BOARD_SUP")
-                board_sup.print_board()
+                last_move = (from_position_index, move)
+                if self.board[move] is not None:
+                    enemy_square = self.board[move]
+                    if self.current_player_color == "white":
+                        color = "black"
+                    else:
+                        color = "white"
+
+                    if type(enemy_square) == Pawn:
+                        enemy_eaten = (Pawn, color, move, enemy_square.en_passant_available, enemy_square.already_moved)
+                    elif type(enemy_square) == Rook:
+                        enemy_eaten = (Rook, color, move, enemy_square.has_moved)
+                    else:
+                        enemy_eaten = (type(enemy_square), color, move)
+                else:
+                    enemy_eaten = ()
+
+                from_square.move(move, self.board.board)
                 if self.current_player_color == "white":
-                    if not cast(King, board_sup[self.white_king]).is_in_check(board_sup.board):
+                    if not cast(King, self.board[self.white_king]).is_in_check(self.board.board):
                         possible_moves.append(move)
-                elif not cast(King, board_sup[self.black_king]).is_in_check(board_sup.board):
-                        possible_moves.append(move)
+                elif not cast(King, self.board[self.black_king]).is_in_check(self.board.board):
+                    possible_moves.append(move)
+
+                self.unmove(last_move, enemy_eaten)
 
             return possible_moves
+
+    def unmove(self, last_move: tuple[tuple[int, int], tuple[int, int]], enemy_eaten: tuple) -> None:
+        self.board[last_move[1]].move(last_move[0], self.board.board)
+        if len(enemy_eaten) == 0:
+            return
+        piece_type: type(Piece) = enemy_eaten[0]
+        self.board[last_move] = piece_type(enemy_eaten[1], enemy_eaten[2])
+        if enemy_eaten[0] == Pawn:
+            self.board[last_move[1]].en_passant_available = enemy_eaten[3]
+            self.board[last_move[1]].already_moved = enemy_eaten[4]
+        elif enemy_eaten[0] == Rook:
+            self.board[last_move[1]].has_moved = enemy_eaten[3]
+
 
 
     def move(self, from_position: str, to_position: str) -> None:
@@ -82,38 +113,38 @@ class ChessGame:
             to_position_index = notation_to_index(to_position)
         except ValueError as ve:
             print(f"Ошибка формата хода: {ve}")
-            self.board_main.print_board()
+            self.board.print_board()
             return
-        from_square = self.board_main[from_position_index]
+        from_square = self.board[from_position_index]
         if to_position_index not in self.get_possible_moves(from_position):
             print("Impossible move")
             return
         else:
-            if from_square.move(to_position_index, self.board_main.board):
-                if type(self.board_main[to_position_index]) == King:
+            if from_square.move(to_position_index, self.board.board):
+                if type(self.board[to_position_index]) == King:
                     if self.current_player_color == "white":
                         self.white_king = to_position_index
                     else:
                         self.black_king = to_position_index
                 self.invert_current_player_color()
                 self.check_game_over()
-        self.board_main.print_board()
+        self.board.print_board()
 
     def check_game_over(self) -> bool:
         if self.current_player_color == "white":
             i, j = self.white_king
         else:
             i, j = self.black_king
-        if self.board_main[i, j].show_possible_moves(self.board_main.board):
+        if self.board[i, j].show_possible_moves(self.board.board):
             return False
         for k in range(8):
             for t in range(8):
-                board_k_t = self.board_main[k, t]
+                board_k_t = self.board[k, t]
                 if board_k_t is not None:
-                    if board_k_t.color == self.current_player_color and board_k_t.show_possible_moves(self.board_main.board):
+                    if board_k_t.color == self.current_player_color and board_k_t.show_possible_moves(self.board.board):
                         return False
 
-        if cast(King, self.board_main[i, j]).is_in_check(self.board_main.board):
+        if cast(King, self.board[i, j]).is_in_check(self.board.board):
             if self.current_player_color == "white":
                 self.result = "black won"
             else:

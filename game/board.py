@@ -14,6 +14,9 @@ class Board:
     def __getitem__(self, item: (int, int)) -> Piece | None:
         return self.board[item[0]][item[1]]
 
+    def __setitem__(self, key: (int, int), value: Piece | None) -> None:
+        self.board[key[0]][key[1]] = value
+
     def print_board(self):
         for i in range(8):
             print(8 - i, end='|')
