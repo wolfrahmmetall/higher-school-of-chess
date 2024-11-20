@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Union, Literal, cast
 
 from board import Board
@@ -74,9 +73,9 @@ class ChessGame:
                         color = "white"
 
                     if type(enemy_square) == Pawn:
-                        enemy_eaten = (Pawn, color, move, enemy_square.en_passant_available, enemy_square.already_moved)
+                        enemy_eaten = (Pawn, color, move, cast(Pawn, enemy_square).en_passant_available, cast(Pawn, enemy_square).already_moved)
                     elif type(enemy_square) == Rook:
-                        enemy_eaten = (Rook, color, move, enemy_square.has_moved)
+                        enemy_eaten = (Rook, color, move, cast(Rook, enemy_square).has_moved)
                     else:
                         enemy_eaten = (type(enemy_square), color, move)
                 else:
@@ -99,11 +98,11 @@ class ChessGame:
             return
         piece_type: type(Piece) = enemy_eaten[0]
         self.board[last_move] = piece_type(enemy_eaten[1], enemy_eaten[2])
-        if enemy_eaten[0] == Pawn:
-            self.board[last_move[1]].en_passant_available = enemy_eaten[3]
-            self.board[last_move[1]].already_moved = enemy_eaten[4]
-        elif enemy_eaten[0] == Rook:
-            self.board[last_move[1]].has_moved = enemy_eaten[3]
+        if piece_type == Pawn:
+            cast(Pawn, self.board[last_move[1]]).en_passant_available = enemy_eaten[3]
+            cast(Pawn, self.board[last_move[1]]).already_moved = enemy_eaten[4]
+        elif piece_type == Rook:
+            cast(Rook, self.board[last_move[1]]).has_moved = enemy_eaten[3]
 
 
 
