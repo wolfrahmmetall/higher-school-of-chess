@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
@@ -21,6 +21,7 @@ const App = () => {
               </RequireAuth>
             } 
           />
+          <Route path="" element={<Navigate to="/login" />} /> {/* Редирект на /login */}
         </Routes>
       </Router>
     </AuthProvider>
