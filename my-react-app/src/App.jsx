@@ -6,6 +6,9 @@ import Dashboard from "./Dashboard";
 import RequireAuth from "./RequireAuth";
 import { AuthProvider } from "./AuthProvider";
 
+import './index.css';
+import './App.css'; 
+
 const App = () => {
   return (
     <AuthProvider>
