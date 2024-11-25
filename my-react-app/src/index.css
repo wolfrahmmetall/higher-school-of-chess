@@ -13,21 +13,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
   display: flex;
+  flex-direction: column;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #ffffff;
+  color: black;
+}
+
+a {
+  font-weight: 500;
+  color: #007bff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #0056b3;
 }
 
 h1 {

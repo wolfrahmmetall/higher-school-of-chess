@@ -4,6 +4,7 @@ import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import RequireAuth from "./RequireAuth";
+import Game from "./Game";
 import { AuthProvider } from "./AuthProvider";
 
 import './index.css';
@@ -24,7 +25,15 @@ const App = () => {
               </RequireAuth>
             } 
           />
-          <Route path="" element={<Navigate to="/login" />} /> {/* Редирект на /login */}
+          <Route 
+            path="/game" 
+            element={
+              <RequireAuth>
+                <Game />
+              </RequireAuth>
+            } 
+          />
+          <Route path="" element={<Navigate to="/login" />} />
         </Routes>
       </Router>
     </AuthProvider>

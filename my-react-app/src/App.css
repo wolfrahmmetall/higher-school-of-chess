@@ -50,7 +50,27 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.dashboard-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.component-container {
+  flex: 1;
+  margin: 0 10px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
 h2 {
+  text-align: center;
+  color: #333;
+}
+
+h3 {
   text-align: center;
   color: #333;
 }
@@ -89,4 +109,18 @@ a:hover {
 .error {
   color: red;
   text-align: center;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+li:last-child {
+  border-bottom: none;
 }
