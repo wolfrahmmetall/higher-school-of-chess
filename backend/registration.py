@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dbpackage.DBHelper import db_helper_user
 from dbpackage.Base import Base
 from api_v1 import router as router_v1
+from game import router as game_router
 import uvicorn
 
 
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=router_v1)
+app.include_router(router=game_router)
 
 origins = [
     "http://127.0.0.1",

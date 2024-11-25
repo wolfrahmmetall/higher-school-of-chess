@@ -1,12 +1,14 @@
 from typing import Union, Literal, cast
 
-from board import Board
+from fastapi import HTTPException
+
+from game.board import Board
 from game.index_notation import index_to_notation
 from game.pieces.king import King
 from game.pieces.pawn import Pawn
 from game.pieces.piece import Piece
 from game.pieces.rook import Rook
-from index_notation import notation_to_index
+from game.index_notation import notation_to_index
 
 PieceColor = Union[Literal["white"], Literal["black"]]
 
@@ -96,7 +98,7 @@ class ChessGame:
         self.board[last_move[1]].move(last_move[0], self.board.board)
         if len(enemy_eaten) == 0:
             return
-        piece_type: type(Piece) = enemy_eaten[0]
+        piece_type: Piece = enemy_eaten[0]
         self.board[last_move] = piece_type(enemy_eaten[1], enemy_eaten[2])
         if piece_type == Pawn:
             cast(Pawn, self.board[last_move[1]]).en_passant_available = enemy_eaten[3]
@@ -106,18 +108,19 @@ class ChessGame:
 
 
 
-    def move(self, from_position: str, to_position: str) -> None:
+    def move(self, from_position: str, to_position: str) -> bool:
         try:
             from_position_index = notation_to_index(from_position)
             to_position_index = notation_to_index(to_position)
         except ValueError as ve:
             print(f"Ошибка формата хода: {ve}")
             self.board.print_board()
-            return
+            return False
         from_square = self.board[from_position_index]
         if to_position_index not in self.get_possible_moves(from_position):
             print("Impossible move")
-            return
+            self.board.print_board()
+            return False
         else:
             if from_square.move(to_position_index, self.board.board):
                 if type(self.board[to_position_index]) == King:
@@ -128,6 +131,7 @@ class ChessGame:
                 self.invert_current_player_color()
                 self.check_game_over()
         self.board.print_board()
+        return True
 
     def check_game_over(self) -> bool:
         if self.current_player_color == "white":
