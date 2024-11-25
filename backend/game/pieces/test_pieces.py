@@ -3,13 +3,13 @@ import copy
 import pytest
 import unittest
 
-from game.pieces.king import King
-from game.pieces.piece import Piece
-from game.pieces.queen import Queen
-from game.pieces.rook import Rook
-from game.pieces.bishop import Bishop
-from game.pieces.knight import Knight
-from game.pieces.pawn import Pawn
+from backend.game.pieces.king import King
+from backend.game.pieces.piece import Piece
+from backend.game.pieces.queen import Queen
+from backend.game.pieces.rook import Rook
+from backend.game.pieces.bishop import Bishop
+from backend.game.pieces.knight import Knight
+from backend.game.pieces.pawn import Pawn
 
 
 class TestPiece(unittest.TestCase):

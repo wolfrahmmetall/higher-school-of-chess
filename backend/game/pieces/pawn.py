@@ -1,9 +1,9 @@
 from typing import List, Tuple, Optional
-from game.pieces.piece import Piece
-from game.pieces.queen import Queen
-from game.pieces.rook import Rook
-from game.pieces.knight import Knight
-from game.pieces.bishop import Bishop
+from backend.game.pieces.piece import Piece
+from backend.game.pieces.queen import Queen
+from backend.game.pieces.rook import Rook
+from backend.game.pieces.knight import Knight
+from backend.game.pieces.bishop import Bishop
 
 
 class Pawn(Piece):

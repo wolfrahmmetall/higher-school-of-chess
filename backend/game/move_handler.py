@@ -4,8 +4,8 @@ from typing import Optional, Dict, Any
 import json
 
 # Импорт предоставленных файлов
-from game.board import Board
-from game.chess_game import ChessGame
+from backend.game.board import Board
+from backend.game.chess_game import ChessGame
 
 # Создание роутера
 router = APIRouter()
