@@ -2,13 +2,13 @@ from typing import Union, Literal, cast
 
 from fastapi import HTTPException
 
-from backend.game.board import Board
-from backend.game.index_notation import index_to_notation
-from backend.game.pieces.king import King
-from backend.game.pieces.pawn import Pawn
-from backend.game.pieces.piece import Piece
-from backend.game.pieces.rook import Rook
-from backend.game.index_notation import notation_to_index
+from .board import Board
+from .index_notation import index_to_notation
+from .pieces.king import King
+from .pieces.pawn import Pawn
+from .pieces.piece import Piece
+from .pieces.rook import Rook
+from .index_notation import notation_to_index
 
 PieceColor = Union[Literal["white"], Literal["black"]]
 

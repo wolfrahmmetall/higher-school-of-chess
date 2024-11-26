@@ -1,20 +1,21 @@
-from backend.game.pieces.bishop import Bishop
-from backend.game.pieces.king import King
-from backend.game.pieces.knight import Knight
-from backend.game.pieces.pawn import Pawn
-from backend.game.pieces.piece import Piece
-from backend.game.pieces.queen import Queen
-from backend.game.pieces.rook import Rook
+from typing import List
+from .pieces.bishop import Bishop
+from .pieces.king import King
+from .pieces.knight import Knight
+from .pieces.pawn import Pawn
+from .pieces.piece import Piece
+from .pieces.queen import Queen
+from .pieces.rook import Rook
 
 
 class Board:
     def __init__(self) -> None:
         self.board: list[list[Piece | None]] = [[None for _ in range(8)] for _ in range(8)]
 
-    def __getitem__(self, item: (int, int)) -> Piece | None:
+    def __getitem__(self, item: List[int]) -> Piece | None:
         return self.board[item[0]][item[1]]
 
-    def __setitem__(self, key: (int, int), value: Piece | None) -> None:
+    def __setitem__(self, key: List[int], value: Piece | None) -> None:
         self.board[key[0]][key[1]] = value
 
     def print_board(self):

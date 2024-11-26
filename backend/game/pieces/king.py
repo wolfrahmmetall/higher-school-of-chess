@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
-from backend.game.pieces.piece import Piece
-from backend.game.pieces.rook import Rook
+from .piece import Piece
+from .rook import Rook
 
 
 class King(Piece):

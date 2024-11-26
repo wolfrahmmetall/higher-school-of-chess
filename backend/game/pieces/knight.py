@@ -1,5 +1,5 @@
 from typing import List, Tuple, Optional
-from backend.game.pieces.piece import Piece
+from .piece import Piece
 
 
 class Knight(Piece):
