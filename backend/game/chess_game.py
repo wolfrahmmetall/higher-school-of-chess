@@ -30,26 +30,6 @@ class ChessGame:
     def start_game(self) -> None:
         self.board.start_board()
         self.board.print_board()
-        while self.result is None:
-            print(f"{self.current_player_color}'s turn")
-            args = input().split()
-            if len(args) != 2:
-                if len(args) == 1 and args[0].lower() == "draw":
-                    print("Write 'accept' to accept the draw.")
-                    ans_to_draw = input()
-                    if ans_to_draw.lower() == "accept":
-                        self.result = "draw"
-                else:
-                    pass
-                    # self.help()
-            elif args[0].lower() + " " + args[1].lower() == "give up":
-                if self.current_player_color == "white":
-                    self.result = "black won"
-                else:
-                    self.result = "white won"
-            else:
-                from_position, to_position = args
-                self.move(from_position, to_position)
 
     def get_possible_moves(self, from_position: str) -> list[tuple[int, int]]:
         try:
