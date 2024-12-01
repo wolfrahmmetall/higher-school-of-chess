@@ -16,7 +16,6 @@ const Game = () => {
       const response = await axios.get(`${API_BASE}/chess/state`);
       setBoard(response.data.board);
       setCurrentTurn(response.data.current_turn);
-      setGameStatus(response.data.status);
     } catch (error) {
       console.error("Ошибка при получении состояния игры:", error);
     }
@@ -31,7 +30,6 @@ const Game = () => {
       });
       setBoard(response.data.board);
       setCurrentTurn(response.data.current_turn);
-      setGameStatus(response.data.status);
       setStartSquare("");
       setEndSquare("");
     } catch (error) {

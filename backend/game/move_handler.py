@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 from fastapi.responses import JSONResponse
+
+from .pieces.piece import Piece
 
 # Импорт предоставленных файлов
 from .board import Board
@@ -49,14 +51,13 @@ def get_game_state() -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Игра ещё не настроена")
 
     try:
-        board_state = [
-            [piece.name if piece else None for piece in row]
+        board_state: List[List[Piece|None]] = [
+            [piece.name() if piece else None for piece in row]
             for row in game.board.board
         ]
         return {
             "board": board_state,
             "current_turn": game.current_player_color,
-            "status": game.status,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении состояния игры: {str(e)}")
@@ -78,7 +79,6 @@ def make_move(move: Move):
         return {
             "board": board_state,
             "current_turn": game.current_player_color,
-            "status": game.status,
             "result": result,
         }
     except Exception as e:
@@ -104,7 +104,6 @@ def restart_game():
             "message": "Игра перезапущена",
             "board": board_state,
             "current_turn": game.current_player_color,
-            "status": game.status,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при перезапуске игры: {str(e)}")
