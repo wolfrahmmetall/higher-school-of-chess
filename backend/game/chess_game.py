@@ -89,6 +89,7 @@ class ChessGame:
 
 
     def move(self, from_position: str, to_position: str) -> bool:
+        ccolor = self.current_player_color + '->'
         try:
             from_position_index = notation_to_index(from_position)
             to_position_index = notation_to_index(to_position)
@@ -101,15 +102,15 @@ class ChessGame:
             print("Impossible move")
             self.board.print_board()
             return False
-        else:
-            if from_square.move(to_position_index, self.board.board):
-                if type(self.board[to_position_index]) == King:
-                    if self.current_player_color == "white":
-                        self.white_king = to_position_index
-                    else:
-                        self.black_king = to_position_index
-                self.invert_current_player_color()
-                self.check_game_over()
+        from_square.move(to_position_index, self.board.board)
+        if type(self.board[to_position_index]) == King:
+            if self.current_player_color == "white":
+                self.white_king = to_position_index
+            else:
+                self.black_king = to_position_index
+        self.invert_current_player_color()
+        print(ccolor, self.current_player_color)
+        self.check_game_over()
         self.board.print_board()
         return True
 

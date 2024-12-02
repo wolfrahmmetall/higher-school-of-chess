@@ -40,7 +40,7 @@ async def get_user(user_id, session: AsyncSession = Depends(db_helper_user.scope
 async def delete_user(user_id, session: AsyncSession = Depends(db_helper_user.scoped_session_dependency)):
     await crud.delete_user_by_id(session=session, uid=user_id)
 
-
+# TODO: загрузить все в .env
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

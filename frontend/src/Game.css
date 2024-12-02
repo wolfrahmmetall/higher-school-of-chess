@@ -1,0 +1,59 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Arial", sans-serif;
+}
+
+.chess-board-container {
+  display: inline-block;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.board-row {
+  display: block; /* Отображение строкой */
+  font-size: 18px;
+  font-family: monospace; /* Шрифт с фиксированной шириной */
+}
+
+.board-cell {
+  display: inline-block; /* Все элементы строки на одной линии */
+  width: 1.5em; /* Пространство под символ */
+  text-align: center;
+}
+
+.notation-row {
+  display: inline-block; /* Горизонтальная линия для нотации */
+  font-size: 18px;
+  /* width: 1.5em; */
+  font-family: monospace;
+}
+
+.notation-cell {
+  display: inline-block;
+  width: 1.5em; /* Соответствует клеткам доски */
+  text-align: center;
+}
+
+.light-cell {
+  background-color: #f0d9b5; /* Светлый цвет клетки */
+}
+
+.dark-cell {
+  background-color: #b58863; /* Темный цвет клетки */
+}
+
+
+.light {
+  background-color: #f0d9b5; 
+}
+
+.dark {
+  background-color: #b58863;
+}
+
+.moves-list {
+  flex: 1;
+  text-align: center;
+}

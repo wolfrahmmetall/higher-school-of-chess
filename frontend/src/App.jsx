@@ -10,6 +10,7 @@ import { AuthProvider } from "./AuthProvider";
 
 import './index.css';
 import './App.css'; 
+import './Game.css'
 
 const App = () => {
   return (

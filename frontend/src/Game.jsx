@@ -10,25 +10,29 @@ const Game = () => {
 
   const API_BASE = "http://127.0.0.1:8000";
 
-  // Fetch the game state from the server
+  const prepareBoard = (board) => {
+    return board.map((row) =>
+      row.map((cell) => (cell && typeof cell === "object" ? cell.name : cell || ""))
+    );
+  };
+
   const fetchGameState = async () => {
     try {
       const response = await axios.get(`${API_BASE}/chess/state`);
-      setBoard(response.data.board);
+      setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
     } catch (error) {
       console.error("Ошибка при получении состояния игры:", error);
     }
   };
 
-  // Make a move
   const makeMove = async () => {
     try {
       const response = await axios.post(`${API_BASE}/chess/move`, {
         start: startSquare,
         end: endSquare,
       });
-      setBoard(response.data.board);
+      setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
       setStartSquare("");
       setEndSquare("");
@@ -38,7 +42,7 @@ const Game = () => {
   };
 
   useEffect(() => {
-    fetchGameState(); // Fetch the initial game state when the component loads
+    fetchGameState();
   }, []);
 
   return (
@@ -46,16 +50,33 @@ const Game = () => {
       <h2>Шахматная игра</h2>
       <p>Текущий ход: {currentTurn}</p>
       <p>Статус игры: {gameStatus}</p>
-      <div className="chess-board">
+      <div className="chess-board-container">
+        {/* Доска с левой нотацией */}
         {board.map((row, rowIndex) => (
           <div key={rowIndex} className="board-row">
+            {/* Нотация слева */}
+            <span className="notation-cell">{8 - rowIndex}</span>
             {row.map((cell, colIndex) => (
-              <div key={colIndex} className="board-cell">
+              <span
+                key={colIndex}
+                className={`board-cell ${
+                  (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
+                }`}
+              >
                 {cell || ""}
-              </div>
+              </span>
             ))}
           </div>
         ))}
+        {/* Нотация сверху */}
+        <div className="notation-row">
+          <span className="notation-cell"></span>
+          {"ABCDEFGH".split("").map((letter) => (
+            <span key={letter} className="notation-cell">
+              {letter}
+            </span>
+          ))}
+        </div>
       </div>
       <div className="move-inputs">
         <input

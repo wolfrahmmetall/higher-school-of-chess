@@ -51,8 +51,9 @@ def get_game_state() -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Игра ещё не настроена")
 
     try:
-        board_state: List[List[Piece|None]] = [
-            [piece.name() if piece else None for piece in row]
+        board_state: List[List[str]] = [
+            # [piece.name() if piece else '\uA900' for piece in row]
+            [piece.name() if piece else '\u00A0' for piece in row]
             for row in game.board.board
         ]
         return {
@@ -72,8 +73,9 @@ def make_move(move: Move):
 
     try:
         result = game.move(move.start, move.end)
-        board_state = [
-            [piece.name if piece else None for piece in row]
+        board_state: List[List[str]] = [
+            # [piece.name() if piece else '\uA900' for piece in row]
+            [piece.name() if piece else '\u00A0' for piece in row]
             for row in game.board.board
         ]
         return {
@@ -96,8 +98,9 @@ def restart_game():
     try:
         game = ChessGame(game_time=game.game_time, increment=game.increment)
         game.start_game()
-        board_state = [
-            [piece.name if piece else None for piece in row]
+        board_state: List[List[str]] = [
+            # [piece.name() if piece else '\uA900' for piece in row]
+            [piece.name() if piece else '\u00A0' for piece in row]
             for row in game.board.board
         ]
         return {

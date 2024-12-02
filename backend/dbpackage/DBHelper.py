@@ -32,5 +32,4 @@ class DatabaseHelper:
         yield session
         await session.close()
 
-db_helper_auth = DatabaseHelper(url=settings_auth.DATABASE_NAME, echo=settings_auth.DATABASE_ECHO)
 db_helper_user = DatabaseHelper(url=settings_user.DATABASE_NAME, echo=settings_user.DATABASE_ECHO)
