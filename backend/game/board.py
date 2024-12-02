@@ -12,10 +12,10 @@ class Board:
     def __init__(self) -> None:
         self.board: list[list[Piece | None]] = [[None for _ in range(8)] for _ in range(8)]
 
-    def __getitem__(self, item: List[int]) -> Piece | None:
+    def __getitem__(self, item: tuple[int, int]) -> Piece | None:
         return self.board[item[0]][item[1]]
 
-    def __setitem__(self, key: List[int], value: Piece | None) -> None:
+    def __setitem__(self, key: tuple[int, int], value: Piece | None) -> None:
         self.board[key[0]][key[1]] = value
 
     def print_board(self):

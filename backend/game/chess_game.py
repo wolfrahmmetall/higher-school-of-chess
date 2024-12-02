@@ -79,7 +79,7 @@ class ChessGame:
         if len(enemy_eaten) == 0:
             return
         piece_type: Piece = enemy_eaten[0]
-        self.board[last_move] = piece_type(enemy_eaten[1], enemy_eaten[2])
+        self.board[last_move[1]] = piece_type(enemy_eaten[1], enemy_eaten[2])
         if piece_type == Pawn:
             cast(Pawn, self.board[last_move[1]]).en_passant_available = enemy_eaten[3]
             cast(Pawn, self.board[last_move[1]]).already_moved = enemy_eaten[4]
