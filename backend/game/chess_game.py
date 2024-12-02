@@ -1,14 +1,12 @@
+import copy
 from typing import Union, Literal, cast
 
-from fastapi import HTTPException
-
 from .board import Board
-from .index_notation import index_to_notation
+from .index_notation import index_to_notation, notation_to_index
 from .pieces.king import King
 from .pieces.pawn import Pawn
 from .pieces.piece import Piece
 from .pieces.rook import Rook
-from .index_notation import notation_to_index
 
 PieceColor = Union[Literal["white"], Literal["black"]]
 
@@ -46,47 +44,34 @@ class ChessGame:
             uncut_possible_moves = from_square.show_possible_moves(self.board.board)
             possible_moves = []
             for move in uncut_possible_moves:
-                last_move = (from_position_index, move)
-                if self.board[move] is not None:
-                    enemy_square = self.board[move]
-                    if self.current_player_color == "white":
-                        color = "black"
-                    else:
-                        color = "white"
+                # Make a deep copy of the board and game state
+                board_copy = copy.deepcopy(self.board)
+                white_king_pos = self.white_king
+                black_king_pos = self.black_king
+                current_player_color = self.current_player_color
 
-                    if type(enemy_square) == Pawn:
-                        enemy_eaten = (Pawn, color, move, cast(Pawn, enemy_square).en_passant_available, cast(Pawn, enemy_square).already_moved)
-                    elif type(enemy_square) == Rook:
-                        enemy_eaten = (Rook, color, move, cast(Rook, enemy_square).has_moved)
+                # Simulate the move on the copy
+                from_square_copy = board_copy[from_position_index]
+                from_square_copy.move(move, board_copy.board)
+                if isinstance(from_square_copy, King):
+                    if current_player_color == 'white':
+                        white_king_pos = move
                     else:
-                        enemy_eaten = (type(enemy_square), color, move)
-                else:
-                    enemy_eaten = ()
+                        black_king_pos = move
 
-                from_square.move(move, self.board.board)
-                if self.current_player_color == "white":
-                    if not cast(King, self.board[self.white_king]).is_in_check(self.board.board):
+                # Now check if the king is in check on the copied board
+                if current_player_color == 'white':
+                    king_piece = board_copy[white_king_pos]
+                    if not king_piece.is_in_check(board_copy.board):
                         possible_moves.append(move)
-                elif not cast(King, self.board[self.black_king]).is_in_check(self.board.board):
-                    possible_moves.append(move)
+                else:
+                    king_piece = board_copy[black_king_pos]
+                    if not king_piece.is_in_check(board_copy.board):
+                        possible_moves.append(move)
 
-                self.unmove(last_move, enemy_eaten)
+                # No need to undo the move, since we worked on a copy
 
             return possible_moves
-
-    def unmove(self, last_move: tuple[tuple[int, int], tuple[int, int]], enemy_eaten: tuple) -> None:
-        self.board[last_move[1]].move(last_move[0], self.board.board)
-        if len(enemy_eaten) == 0:
-            return
-        piece_type: Piece = enemy_eaten[0]
-        self.board[last_move[1]] = piece_type(enemy_eaten[1], enemy_eaten[2])
-        if piece_type == Pawn:
-            cast(Pawn, self.board[last_move[1]]).en_passant_available = enemy_eaten[3]
-            cast(Pawn, self.board[last_move[1]]).already_moved = enemy_eaten[4]
-        elif piece_type == Rook:
-            cast(Rook, self.board[last_move[1]]).has_moved = enemy_eaten[3]
-
-
 
     def move(self, from_position: str, to_position: str) -> bool:
         ccolor = self.current_player_color + '->'
@@ -103,7 +88,7 @@ class ChessGame:
             self.board.print_board()
             return False
         from_square.move(to_position_index, self.board.board)
-        if type(self.board[to_position_index]) == King:
+        if isinstance(self.board[to_position_index], King):
             if self.current_player_color == "white":
                 self.white_king = to_position_index
             else:
