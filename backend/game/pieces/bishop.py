@@ -80,14 +80,13 @@ class Bishop(Piece):
         """
         possible_moves = self.show_possible_moves(board)
         if move not in possible_moves:
-            print("Недопустимый ход.")
             return False
 
         new_row, new_col = move
         target_piece = board[new_row][new_col]
         if target_piece is not None:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece.name()} взята.")
+                pass
             else:
                 # Это условие уже покрыто в show_possible_moves
                 pass

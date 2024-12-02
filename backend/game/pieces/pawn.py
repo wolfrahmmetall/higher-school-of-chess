@@ -39,13 +39,11 @@ class Pawn(Piece):
 
         # Если фигура связана, она не может двигаться
         if self.is_tied():
-            print("Пешка связана и не может двигаться.")
             return False
 
         # Получаем список допустимых ходов с учётом последнего хода
         possible_moves = self.show_possible_moves(board, last_move)
         if move not in possible_moves:
-            print("Недопустимый ход.")
             return False
 
         # Определяем направление движения пешки
@@ -72,7 +70,7 @@ class Pawn(Piece):
         # Если это обычное взятие
         if target_piece and not en_passant:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece.name()} взята.")
+                pass
             else:
                 # Это условие уже покрыто в show_possible_moves
                 pass
@@ -168,7 +166,6 @@ class Pawn(Piece):
 
         # Проверяем корректность выбора фигуры
         if promotion_choice not in piece_classes:
-            print("Недопустимая фигура для превращения. Превращаемся в ферзя по умолчанию.")
             promotion_choice = 'Q'
 
         # Создаём новый объект выбранной фигуры

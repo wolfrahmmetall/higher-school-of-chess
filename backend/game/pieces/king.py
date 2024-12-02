@@ -76,14 +76,13 @@ class King(Piece):
         """
         possible_moves = self.show_possible_moves(board)
         if move not in possible_moves:
-            print("Недопустимый ход.")
             return False
 
         new_row, new_col = move
         target_piece = board[new_row][new_col]
         if target_piece is not None:
             if self._is_opponent_piece(target_piece):
-                print(f"Вражеская фигура {target_piece.name()} взята.")
+                pass
             else:
                 # Это условие уже покрыто в show_possible_moves
                 pass
@@ -97,7 +96,6 @@ class King(Piece):
                 if rook and not rook.has_moved:
                     self.castle(board, rook, 'kingside')
                 else:
-                    print("Недопустимая рокировка: ладья уже перемещена или отсутствует.")
                     return False
             else:
                 # Длинная рокировка (рокировка на левую сторону)
@@ -105,14 +103,12 @@ class King(Piece):
                 if rook and not rook.has_moved:
                     self.castle(board, rook, 'queenside')
                 else:
-                    print("Недопустимая рокировка: ладья уже перемещена или отсутствует.")
                     return False
             # Обновляем позицию короля после рокировки
             board[self.current_square[0]][self.current_square[1]] = None
             board[new_row][new_col] = self
             self.current_square = (new_row, new_col)
             self.has_moved = True
-            print("Рокировка выполнена успешно.")
             return True
 
         # Перемещаем короля на новую позицию
