@@ -25,13 +25,6 @@ class Pawn(Piece):
         move: Tuple[int, int],
         board: List[List[Optional['Piece']]]
     ) -> bool:
-        """
-        Executes a pawn move if it's valid, including en passant and promotion.
-
-        :param move: Tuple with the move in format (new_row, new_col).
-        :param board: 8x8 matrix representing the chessboard.
-        :return: True if the move was made, else False.
-        """
         new_row, new_col = move
         old_row, old_col = self.current_square
 
@@ -70,15 +63,17 @@ class Pawn(Piece):
         self.current_square = (new_row, new_col)
         self.already_moved = True
 
-        # Reset en passant flags for all pawns
+        # Reset en passant flags for all pawns except this one
         for row_pieces in board:
             for piece in row_pieces:
-                if isinstance(piece, Pawn):
+                if isinstance(piece, Pawn) and piece != self:
                     piece.can_be_captured_en_passant = False
 
         # If the pawn moved two squares forward, set can_be_captured_en_passant to True
         if abs(new_row - old_row) == 2:
             self.can_be_captured_en_passant = True
+        else:
+            self.can_be_captured_en_passant = False
 
         # Check for promotion
         if self._is_promotion(new_row):
@@ -134,16 +129,16 @@ class Pawn(Piece):
         # Place the new piece on the board
         board[new_row][new_col] = promoted_piece
 
-        # The pawn is already removed from the old position in the move method
-
     def show_possible_moves(
         self,
-        board: List[List[Optional['Piece']]]
+        board: List[List[Optional['Piece']]],
+        last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
     ) -> List[Tuple[int, int]]:
         """
         Returns a list of valid moves for the pawn, considering the current board state.
 
         :param board: The current board.
+        :param last_move: (Unused in this method, included for consistency)
         :return: List of tuples with valid moves (new_row, new_col).
         """
         possible_moves = []
@@ -157,9 +152,9 @@ class Pawn(Piece):
             possible_moves.append((forward_row, col))
 
             # Two squares forward from starting position
-            if row == start_row:
+            if row == start_row and board[forward_row][col] is None:
                 double_forward_row = row + 2 * direction
-                if board[double_forward_row][col] is None:
+                if 0 <= double_forward_row < 8 and board[double_forward_row][col] is None:
                     possible_moves.append((double_forward_row, col))
 
         # Captures
