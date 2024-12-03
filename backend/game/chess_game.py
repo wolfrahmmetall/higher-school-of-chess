@@ -74,7 +74,7 @@ class ChessGame:
             return possible_moves
 
     def move(self, from_position: str, to_position: str) -> bool:
-        ccolor = self.current_player_color + '->'
+        previous_player_color = self.current_player_color
         try:
             from_position_index = notation_to_index(from_position)
             to_position_index = notation_to_index(to_position)
@@ -93,30 +93,58 @@ class ChessGame:
                 self.white_king = to_position_index
             else:
                 self.black_king = to_position_index
+
+        # Invert the current player color
         self.invert_current_player_color()
-        print(ccolor, self.current_player_color)
-        self.check_game_over()
+        next_player_color = self.current_player_color
+        color_change = f"{previous_player_color}->{next_player_color}"
+        print(color_change)
+
+        # Add an extra newline to separate output
+        print()
+
+        # Print the board
         self.board.print_board()
+
+        # Check if the game is over after the move
+        self.check_game_over()
+
         return True
 
     def check_game_over(self) -> bool:
         if self.current_player_color == "white":
-            i, j = self.white_king
+            king_pos = self.white_king
         else:
-            i, j = self.black_king
-        if self.board[i, j].show_possible_moves(self.board.board):
-            return False
-        for k in range(8):
-            for t in range(8):
-                board_k_t = self.board[k, t]
-                if board_k_t is not None:
-                    if board_k_t.color == self.current_player_color and board_k_t.show_possible_moves(self.board.board):
-                        return False
+            king_pos = self.black_king
+        king_piece = self.board[king_pos]
+        # Check if any move is possible for the current player
+        has_possible_moves = False
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i, j]
+                if piece is not None and piece.color == self.current_player_color:
+                    from_notation = index_to_notation(i, j)
+                    if self.get_possible_moves(from_notation):
+                        has_possible_moves = True
+                        break
+            if has_possible_moves:
+                break
 
-        if cast(King, self.board[i, j]).is_in_check(self.board.board):
-            if self.current_player_color == "white":
-                self.result = "black won"
-            else:
-                self.result = "white won"
+        if has_possible_moves:
+            # The player has possible moves; the game continues
+            return False
         else:
-            self.result = "draw"
+            # No possible moves, check if the king is in check
+            if isinstance(king_piece, King) and king_piece.is_in_check(self.board.board):
+                # King is in check, checkmate
+                if self.current_player_color == "white":
+                    print("Checkmate! Black wins.")
+                    self.result = "black won"
+                else:
+                    print("Checkmate! White wins.")
+                    self.result = "white won"
+            else:
+                # King is not in check, stalemate
+                print("Stalemate! It's a draw.")
+                self.result = "draw"
+            return True
