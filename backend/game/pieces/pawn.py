@@ -13,6 +13,11 @@ class Pawn(Piece):
         self.already_moved = False
 
     def name(self) -> str:
+        """
+        Returns the representation of the pawn.
+
+        :return: 'P' for white pawn, 'p' for black pawn.
+        """
         return 'P' if self.color == 'white' else 'p'
 
     def move(
@@ -20,10 +25,17 @@ class Pawn(Piece):
         move: Tuple[int, int],
         board: List[List[Optional['Piece']]]
     ) -> bool:
+        """
+        Executes a pawn move if it's valid, including en passant and promotion.
+
+        :param move: Tuple with the move in format (new_row, new_col).
+        :param board: 8x8 matrix representing the chessboard.
+        :return: True if the move was made, else False.
+        """
         new_row, new_col = move
         old_row, old_col = self.current_square
 
-        # If the piece is tied (pinned), it cannot move
+        # If the piece is pinned, it cannot move
         if self.is_tied():
             return False
 
@@ -49,7 +61,7 @@ class Pawn(Piece):
                 board[captured_row][captured_col] = None
                 is_en_passant = True
             else:
-                print("Ошибка: Нет пешки для взятия на проходе.")
+                print("Error: No pawn to capture en passant.")
                 return False
 
         # Move the pawn
@@ -68,12 +80,72 @@ class Pawn(Piece):
         if abs(new_row - old_row) == 2:
             self.can_be_captured_en_passant = True
 
+        # Check for promotion
+        if self._is_promotion(new_row):
+            self._promote(board, new_row, new_col)
+
         return True
+
+    def _is_promotion(self, new_row: int) -> bool:
+        """
+        Checks if the pawn should be promoted.
+
+        :param new_row: The new row after the move.
+        :return: True if promotion is needed, else False.
+        """
+        if self.color == 'white' and new_row == 0:
+            return True
+        if self.color == 'black' and new_row == 7:
+            return True
+        return False
+
+    def _promote(
+            self,
+            board: List[List['Piece']],
+            new_row: int,
+            new_col: int
+    ):
+        """
+        Promotes the pawn to the chosen piece. Supports Queen, Rook, Bishop, and Knight.
+
+        :param board: The current board.
+        :param new_row: The new row after the move.
+        :param new_col: The new column after the move.
+        """
+        # Mapping symbols to piece classes
+        piece_classes = {
+            'Q': Queen,
+            'R': Rook,
+            'B': Bishop,
+            'N': Knight
+        }
+
+        # Prompt the user for promotion choice
+        while True:
+            promotion_choice = input("Choose promotion piece (Q, R, B, N): ").upper()
+            if promotion_choice in piece_classes:
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+        # Create a new object of the chosen piece
+        promoted_piece = piece_classes[promotion_choice](self.color, (new_row, new_col))
+
+        # Place the new piece on the board
+        board[new_row][new_col] = promoted_piece
+
+        # The pawn is already removed from the old position in the move method
 
     def show_possible_moves(
         self,
         board: List[List[Optional['Piece']]]
     ) -> List[Tuple[int, int]]:
+        """
+        Returns a list of valid moves for the pawn, considering the current board state.
+
+        :param board: The current board.
+        :return: List of tuples with valid moves (new_row, new_col).
+        """
         possible_moves = []
         row, col = self.current_square
         direction = -1 if self.color == 'white' else 1
@@ -111,8 +183,19 @@ class Pawn(Piece):
         return possible_moves
 
     def _is_opponent_piece(self, piece: 'Piece') -> bool:
+        """
+        Checks if the piece belongs to the opponent.
+
+        :param piece: The piece to check.
+        :return: True if the piece belongs to the opponent, else False.
+        """
         return piece.color != self.color
 
     def is_tied(self) -> bool:
-        # Implement logic to check if the piece is pinned (currently not implemented)
+        """
+        Checks if the piece is pinned and cannot move.
+
+        :return: True if the piece is pinned, else False.
+        """
+        # Implement the logic to check if the piece is pinned
         return False
