@@ -9,227 +9,110 @@ from .bishop import Bishop
 class Pawn(Piece):
     def __init__(self, color: str, position: Tuple[int, int]):
         super().__init__(color, position)
-        self.en_passant_available = None
-        self.already_moved = None
+        self.can_be_captured_en_passant = False
+        self.already_moved = False
 
     def name(self) -> str:
-        """
-        Возвращает обозначение коня.
-
-        :return: 'N' для белого коня, 'n' для чёрного коня.
-        """
         return 'P' if self.color == 'white' else 'p'
 
     def move(
-            self,
-            move: Tuple[int, int],
-            board: List[List[Optional['Piece']]],
-            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+        self,
+        move: Tuple[int, int],
+        board: List[List[Optional['Piece']]]
     ) -> bool:
-        """
-        Выполняет ход пешкой, если он допустим, включая взятие на проходе и превращение.
-
-        :param move: Кортеж с ходом в формате (new_row, new_col).
-                     Например: (4, 0), (0, 0)
-        :param board: 8x8 матрица, представляющая шахматную доску.
-        :param last_move: Последний совершённый ход в формате ((from_row, from_col), (to_row, to_col), promotion_piece)
-        :return: True если ход выполнен, иначе False
-        """
         new_row, new_col = move
+        old_row, old_col = self.current_square
 
-        # Если фигура связана, она не может двигаться
+        # If the piece is tied (pinned), it cannot move
         if self.is_tied():
             return False
 
-        # Получаем список допустимых ходов с учётом последнего хода
-        possible_moves = self.show_possible_moves(board, last_move)
+        # Get the list of possible moves
+        possible_moves = self.show_possible_moves(board)
         if move not in possible_moves:
             return False
 
-        # Определяем направление движения пешки
+        # Determine the direction of movement
         direction = -1 if self.color == 'white' else 1
 
-        # Проверка на взятие на проходе
-        en_passant = False
-        if last_move and self._is_en_passant(move, last_move, board):
-            en_passant = True
-            captured_row = new_row + direction
+        # Determine if this is an en passant capture
+        is_en_passant = False
+        if new_col != old_col and board[new_row][new_col] is None:
+            # En passant capture
+            captured_row = old_row
             captured_col = new_col
             captured_piece = board[captured_row][captured_col]
-            if captured_piece and isinstance(captured_piece, Pawn) and captured_piece.color != self.color:
+            if (captured_piece and
+                isinstance(captured_piece, Pawn) and
+                self._is_opponent_piece(captured_piece) and
+                captured_piece.can_be_captured_en_passant):
                 board[captured_row][captured_col] = None
-
+                is_en_passant = True
             else:
                 print("Ошибка: Нет пешки для взятия на проходе.")
                 return False
 
-        # Перемещаем пешку на новую позицию
-        board[self.current_square[0]][self.current_square[1]] = None
-        target_piece = board[new_row][new_col]
+        # Move the pawn
+        board[old_row][old_col] = None
+        board[new_row][new_col] = self
+        self.current_square = (new_row, new_col)
+        self.already_moved = True
 
-        # Если это обычное взятие
-        if target_piece and not en_passant:
-            if self._is_opponent_piece(target_piece):
-                pass
-            else:
-                # Это условие уже покрыто в show_possible_moves
-                pass
+        # Reset en passant flags for all pawns
+        for row_pieces in board:
+            for piece in row_pieces:
+                if isinstance(piece, Pawn):
+                    piece.can_be_captured_en_passant = False
 
-        # Превращение пешки, если достигнута последняя горизонталь
-        if self._is_promotion(new_row):
-            self._promote(board, new_row, new_col)
-        else:
-            board[new_row][new_col] = self
-            self.current_square = (new_row, new_col)
-            self.already_moved = True
-
-            # Установка флага en_passant_available, если пешка сделала ход на два поля
-            if abs(new_row - self.current_square[0]) == 2:
-                self.en_passant_available = True
-            else:
-                self.en_passant_available = False
+        # If the pawn moved two squares forward, set can_be_captured_en_passant to True
+        if abs(new_row - old_row) == 2:
+            self.can_be_captured_en_passant = True
 
         return True
-
-    def _is_en_passant(self, move: Tuple[int, int], last_move: Tuple[Tuple[int, int], Tuple[int, int], Optional[str]],
-                       board: List[List['Piece']]) -> bool:
-        """
-        Проверяет, является ли текущий ход взятием на проходе.
-
-        :param move: Текущий ход в формате (new_row, new_col).
-        :param last_move: Последний совершённый ход.
-        :param board: Текущая доска.
-        :return: True если это взятие на проходе, иначе False.
-        """
-        new_row, new_col = move
-        last_from, last_to, _ = last_move
-        last_piece = board[last_to[0]][last_to[1]]
-
-        # Проверяем, что последним ходом был пешка, сделавшая ход на два поля
-        if not isinstance(last_piece, Pawn):
-            return False
-        if abs(last_to[0] - last_from[0]) != 2:
-            return False
-
-        # Проверяем, находится ли наша пешка рядом с пешкой, которая сделала двойной ход
-        if last_to[0] != self.current_square[0]:
-            return False
-        if abs(last_to[1] - self.current_square[1]) != 1:
-            return False
-
-        # Проверяем, что текущий ход является диагональным
-        if abs(new_col - self.current_square[1]) != 1:
-            return False
-        if new_row - self.current_square[0] != (-1 if self.color == 'white' else 1):
-            return False
-
-        return True
-
-    def _is_promotion(self, new_row: int) -> bool:
-        """
-        Проверяет, должна ли пешка превратиться в другую фигуру.
-
-        :param new_row: Новая строка после хода.
-        :return: True если необходимо превращение, иначе False.
-        """
-        if self.color == 'white' and new_row == 0:
-            return True
-        if self.color == 'black' and new_row == 7:
-            return True
-        return False
-
-    def _promote(
-            self,
-            board: List[List['Piece']],
-            new_row: int,
-            new_col: int,
-            promotion_choice: Optional[str] = 'Q'
-    ):
-        """
-        Превращает пешку в указанную фигуру. Поддерживаются ферзь, ладья, слон и конь.
-
-        :param board: Текущая доска.
-        :param new_row: Новая строка после хода.
-        :param new_col: Новый столбец после хода.
-        :param promotion_choice: Символ новой фигуры ('Q', 'R', 'B', 'N'). По умолчанию 'Q'.
-        """
-        # Сопоставление символов с классами фигур
-        piece_classes = {
-            'Q': Queen,
-            'R': Rook,
-            'B': Bishop,
-            'N': Knight
-        }
-
-        # Приводим выбор к верхнему регистру для согласованности
-        promotion_choice = promotion_choice.upper()
-
-        # Проверяем корректность выбора фигуры
-        if promotion_choice not in piece_classes:
-            promotion_choice = 'Q'
-
-        # Создаём новый объект выбранной фигуры
-        promoted_piece = piece_classes[promotion_choice](self.color, (new_row, new_col))
-
-        # Размещаем новую фигуру на доске
-        board[new_row][new_col] = promoted_piece
-
-        # Удаляем пешку с доски
-        board[self.current_square[0]][self.current_square[1]] = None
 
     def show_possible_moves(
-            self,
-            board: List[List[Optional['Piece']]],
-            last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None
+        self,
+        board: List[List[Optional['Piece']]]
     ) -> List[Tuple[int, int]]:
-        """
-        Возвращает список допустимых ходов для пешки, учитывая текущее состояние доски и последний ход.
-
-        :param board: Текущая доска.
-        :param last_move: Последний совершённый ход.
-        :return: Список кортежей с допустимыми ходами (new_row, new_col).
-        """
         possible_moves = []
         row, col = self.current_square
         direction = -1 if self.color == 'white' else 1
         start_row = 6 if self.color == 'white' else 1
 
-        # Обычный ход вперед
+        # One square forward
         forward_row = row + direction
         if 0 <= forward_row < 8 and board[forward_row][col] is None:
             possible_moves.append((forward_row, col))
-            # Двойной ход с начальной позиции
-            double_forward_row = row + 2 * direction
-            if row == start_row and board[double_forward_row][col] is None:
-                possible_moves.append((double_forward_row, col))
 
-        # Взятие по диагонали
+            # Two squares forward from starting position
+            if row == start_row:
+                double_forward_row = row + 2 * direction
+                if board[double_forward_row][col] is None:
+                    possible_moves.append((double_forward_row, col))
+
+        # Captures
         for delta_col in [-1, 1]:
             new_col = col + delta_col
             if 0 <= new_col < 8:
-                target_piece = board[forward_row][new_col]
-                if target_piece and self._is_opponent_piece(target_piece):
-                    possible_moves.append((forward_row, new_col))
-                # Взятие на проходе
-                if last_move and self._is_en_passant((forward_row, new_col), last_move, board):
-                    possible_moves.append((forward_row, new_col))
+                target_row = row + direction
+                if 0 <= target_row < 8:
+                    target_piece = board[target_row][new_col]
+                    if target_piece and self._is_opponent_piece(target_piece):
+                        possible_moves.append((target_row, new_col))
+                    else:
+                        # En passant capture
+                        adjacent_piece = board[row][new_col]
+                        if (adjacent_piece and
+                            isinstance(adjacent_piece, Pawn) and
+                            self._is_opponent_piece(adjacent_piece) and
+                            adjacent_piece.can_be_captured_en_passant):
+                            possible_moves.append((target_row, new_col))
 
         return possible_moves
 
     def _is_opponent_piece(self, piece: 'Piece') -> bool:
-        """
-        Проверяет, принадлежит ли фигура противнику.
-
-        :param piece: Фигура для проверки.
-        :return: True если фигура принадлежит противнику, иначе False.
-        """
         return piece.color != self.color
 
     def is_tied(self) -> bool:
-        """
-        Проверяет, связана ли фигура и не может ли она двигаться.
-
-        :return: True если фигура связана, иначе False.
-        """
-        # Реализуйте логику проверки связности фигуры
+        # Implement logic to check if the piece is pinned (currently not implemented)
         return False
