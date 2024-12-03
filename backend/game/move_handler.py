@@ -81,7 +81,7 @@ def make_move(move: Move):
         return {
             "board": board_state,
             "current_turn": game.current_player_color,
-            "result": result,
+            "result": game.result,
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Ошибка при выполнении хода: {str(e)}")

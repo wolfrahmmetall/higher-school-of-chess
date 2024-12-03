@@ -139,12 +139,12 @@ class ChessGame:
                 # King is in check, checkmate
                 if self.current_player_color == "white":
                     print("Checkmate! Black wins.")
-                    self.result = "black won"
+                    self.result = "Мат. Победа черных!"
                 else:
                     print("Checkmate! White wins.")
-                    self.result = "white won"
+                    self.result = "Мат. Победа белых!"
             else:
                 # King is not in check, stalemate
                 print("Stalemate! It's a draw.")
-                self.result = "draw"
+                self.result = "Тупик. Ничья!"
             return True

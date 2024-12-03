@@ -7,6 +7,7 @@ const Game = () => {
   const [gameStatus, setGameStatus] = useState("");
   const [startSquare, setStartSquare] = useState("");
   const [endSquare, setEndSquare] = useState("");
+  const [gameResult, setGameResult] = useState(null); // Состояние для результата игры
 
   const API_BASE = "http://127.0.0.1:8000";
 
@@ -34,6 +35,7 @@ const Game = () => {
       });
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
+      setGameResult(response.data.result); // Сохраняем результат игры
       setStartSquare("");
       setEndSquare("");
     } catch (error) {
@@ -48,14 +50,24 @@ const Game = () => {
   return (
     <div className="game-container">
       <h2>Шахматная игра</h2>
-      <p>Текущий ход: {currentTurn}</p>
-      <p>Статус игры: {gameStatus}</p>
-      
+      {gameResult ? ( // Если игра окончена, отображаем результат
+        <p className="game-result">
+          Результат игры: {gameResult === "draw" ? "Ничья" : `${gameResult}`}
+        </p>
+      ) : (
+        <p>Текущий ход: {currentTurn}</p>
+      )}
       <div className="chess-board-container">
-        {/* Доска с левой нотацией */}
+        <div className="notation-row">
+          <div className="notation-cell"></div>
+          {"ABCDEFGH".split("").map((letter) => (
+            <span key={letter} className="notation-cell">
+              {letter}
+            </span>
+          ))}
+        </div>
         {board.map((row, rowIndex) => (
           <div key={rowIndex} className="board-row">
-            {/* Нотация слева */}
             <span className="notation-cell">{8 - rowIndex}</span>
             {row.map((cell, colIndex) => (
               <span
@@ -64,36 +76,29 @@ const Game = () => {
                   (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
                 }`}
               >
-                {cell || ""}
+                {cell || "\u00A0"}
               </span>
             ))}
           </div>
         ))}
-        {/* Нотация сверху */}
-        <div className="notation-row">
-          <span className="notation-cell"></span>
-          {"ABCDEFGH".split("").map((letter) => (
-            <span key={letter} className="notation-cell">
-              {letter}
-            </span>
-          ))}
+      </div>
+      {!gameResult && ( // Поля ввода отображаются только если игра не окончена
+        <div className="move-inputs">
+          <input
+            type="text"
+            value={startSquare}
+            placeholder="Начало (например, e2)"
+            onChange={(e) => setStartSquare(e.target.value)}
+          />
+          <input
+            type="text"
+            value={endSquare}
+            placeholder="Конец (например, e4)"
+            onChange={(e) => setEndSquare(e.target.value)}
+          />
+          <button onClick={makeMove}>Сделать ход</button>
         </div>
-      </div>
-      <div className="move-inputs">
-        <input
-          type="text"
-          value={startSquare}
-          placeholder="Начало (например, e2)"
-          onChange={(e) => setStartSquare(e.target.value)}
-        />
-        <input
-          type="text"
-          value={endSquare}
-          placeholder="Конец (например, e4)"
-          onChange={(e) => setEndSquare(e.target.value)}
-        />
-        <button onClick={makeMove}>Сделать ход</button>
-      </div>
+      )}
     </div>
   );
 };
