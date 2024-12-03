@@ -50,6 +50,7 @@ const Game = () => {
       <h2>Шахматная игра</h2>
       <p>Текущий ход: {currentTurn}</p>
       <p>Статус игры: {gameStatus}</p>
+      
       <div className="chess-board-container">
         {/* Доска с левой нотацией */}
         {board.map((row, rowIndex) => (
