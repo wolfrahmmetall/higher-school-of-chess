@@ -1,5 +1,33 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import './Game.css';
+import whitepawn from './assets/white-pawn.png';
+import whiteknight from './assets/white-knight.png';
+import whitebishop from './assets/white-bishop.png';
+import whiterook from './assets/white-rook.png';
+import whitequeen from './assets/white-queen.png';
+import whiteking from './assets/white-king.png';
+import blackpawn from './assets/black-pawn.png';
+import blackknight from './assets/black-knight.png';
+import blackbishop from './assets/black-bishop.png';
+import blackrook from './assets/black-rook.png';
+import blackqueen from './assets/black-queen.png';
+import blackking from './assets/black-king.png';
+
+const pieceMapping = {
+  '♙': whitepawn,
+  '♘': whiteknight,
+  '♗': whitebishop,
+  '♖': whiterook,
+  '♕': whitequeen,
+  '♔': whiteking,
+  '♟': blackpawn,
+  '♞': blackknight,
+  '♝': blackbishop,
+  '♜': blackrook,
+  '♛': blackqueen,
+  '♚': blackking,
+};
 
 const Game = () => {
   const [board, setBoard] = useState([]);
@@ -7,7 +35,7 @@ const Game = () => {
   const [gameStatus, setGameStatus] = useState("");
   const [startSquare, setStartSquare] = useState("");
   const [endSquare, setEndSquare] = useState("");
-  const [gameResult, setGameResult] = useState(null); // Состояние для результата игры
+  const [gameResult, setGameResult] = useState(null);
 
   const API_BASE = "http://127.0.0.1:8000";
 
@@ -35,7 +63,7 @@ const Game = () => {
       });
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
-      setGameResult(response.data.result); // Сохраняем результат игры
+      setGameResult(response.data.result);
       setStartSquare("");
       setEndSquare("");
     } catch (error) {
@@ -50,7 +78,7 @@ const Game = () => {
   return (
     <div className="game-container">
       <h2>Шахматная игра</h2>
-      {gameResult ? ( // Если игра окончена, отображаем результат
+      {gameResult ? (
         <p className="game-result">
           Результат игры: {gameResult === "draw" ? "Ничья" : `${gameResult}`}
         </p>
@@ -76,13 +104,15 @@ const Game = () => {
                   (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
                 }`}
               >
-                {cell || "\u00A0"}
+                {cell && pieceMapping[cell] ? (
+                  <img src={pieceMapping[cell]} className="chess-piece" alt={cell} />
+                ) : '\u00A0'}
               </span>
             ))}
           </div>
         ))}
       </div>
-      {!gameResult && ( // Поля ввода отображаются только если игра не окончена
+      {!gameResult && (
         <div className="move-inputs">
           <input
             type="text"

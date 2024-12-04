@@ -20,7 +20,7 @@ class King(Piece):
 
         :return: 'K' для белого короля, 'k' для чёрного короля.
         """
-        return 'K' if self.color == 'white' else 'k'
+        return '\u2654' if self.color == 'white' else '\u265A'
 
     def show_possible_moves(
         self,

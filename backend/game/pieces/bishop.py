@@ -18,7 +18,7 @@ class Bishop(Piece):
 
         :return: 'B' для белого слона, 'b' для чёрного слона.
         """
-        return 'B' if self.color == 'white' else 'b'
+        return '\u2657' if self.color == 'white' else '\u265D'
 
     def show_possible_moves(
             self,

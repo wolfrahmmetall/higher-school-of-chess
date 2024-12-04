@@ -18,7 +18,7 @@ class Queen(Piece):
 
         :return: 'Q' для белого ферзя, 'q' для чёрного ферзя.
         """
-        return 'Q' if self.color == 'white' else 'q'
+        return '\u2655' if self.color == 'white' else '\u265B'
 
     def show_possible_moves(
             self,

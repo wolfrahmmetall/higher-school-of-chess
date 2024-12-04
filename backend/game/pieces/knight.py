@@ -18,7 +18,7 @@ class Knight(Piece):
 
         :return: 'N' для белого коня, 'n' для чёрного коня.
         """
-        return 'N' if self.color == 'white' else 'n'
+        return '\u2658' if self.color == 'white' else '\u265E'
 
     def show_possible_moves(self, board: List[List[Optional[Piece]]],
                             last_move: Optional[Tuple[Tuple[int, int], Tuple[int, int], Optional[str]]] = None) -> List[

@@ -19,7 +19,7 @@ class Rook(Piece):
 
         :return: 'R' для белой ладьи, 'r' для чёрной ладьи.
         """
-        return 'R' if self.color == 'white' else 'r'
+        return '\u2656' if self.color == 'white' else '\u265C'
 
     def show_possible_moves(
             self,

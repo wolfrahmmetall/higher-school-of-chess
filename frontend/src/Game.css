@@ -1,39 +1,50 @@
 .game-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
   font-family: "Arial", sans-serif;
 }
 
 .chess-board-container {
   display: inline-block;
-  margin: 10px 0;
+  margin: 10px 20px 10px 0px;
   text-align: left;
+  position: relative;
 }
 
 .board-row {
-  display: block; /* Отображение строкой */
-  font-size: 18px;
-  font-family: monospace; /* Шрифт с фиксированной шириной */
+  display: flex; /* Flexbox для устранения пробелов */
+  font-size: 18px; /* Убираем пробелы между клетками */
 }
 
 .board-cell {
-  display: inline-block; /* Все элементы строки на одной линии */
-  width: 1.5em; /* Пространство под символ */
+  flex-shrink: 0; /* Убираем возможность сжатия клетки */
+  display: block;
+  width: 3em;
+  height: 3em;
   text-align: center;
+  position: relative;
+}
+
+.chess-piece {
+  width: 100%;
+  height: 100%;
 }
 
 .notation-row {
-  display: inline-block; /* Горизонтальная линия для нотации */
-  font-size: 18px;
-  /* width: 1.5em; */
-  font-family: monospace;
+  display: flex; /* Flexbox для упрощения размещения */
+  justify-content: space-between; /* Равномерное распределение */
+  font-size: 1em;
+  margin-bottom: 0.5em; /* Отступ */
 }
 
 .notation-cell {
-  display: inline-block;
-  width: 1.5em; /* Соответствует клеткам доски */
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3em;
+  height: 3em;
+  line-height: 1;
 }
 
 .light-cell {

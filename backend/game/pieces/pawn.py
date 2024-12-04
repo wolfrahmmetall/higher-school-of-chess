@@ -18,7 +18,7 @@ class Pawn(Piece):
 
         :return: 'P' for white pawn, 'p' for black pawn.
         """
-        return 'P' if self.color == 'white' else 'p'
+        return '\u2659' if self.color == 'white' else '\u265F'
 
     def move(
         self,
