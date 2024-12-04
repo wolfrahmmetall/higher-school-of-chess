@@ -1,9 +1,15 @@
 import copy
 import unittest
+import pytest
+from unittest import mock
 from typing import Optional
 
+from backend.game.pieces.bishop import Bishop
+from backend.game.pieces.knight import Knight
 from backend.game.pieces.pawn import Pawn
 from backend.game.pieces.piece import Piece
+from backend.game.pieces.queen import Queen
+from backend.game.pieces.rook import Rook
 
 
 class TestPawn(unittest.TestCase):
@@ -124,3 +130,17 @@ class TestPawn(unittest.TestCase):
         self.assertFalse(pawn.move((2, 2), self.board))
         self.assertIsInstance(self.board[3][2], Pawn)
         self.assertIsInstance(self.board[3][3], Pawn)
+
+    @mock.patch('builtins.input', create=True)
+    def test_promotion(self, mock_input):
+        mock_input.side_effect = ['Q', 'R', 'B', 'N']  # Ввод для каждого из превращений
+        result_classes = [Queen, Rook, Bishop, Knight]
+
+        for i in range(4):
+            pawn = Pawn("white", (1, i))
+            pawn.move((0, i), self.board)
+            # Проверяем, что новая фигура имеет правильный класс
+            self.assertIsInstance(self.board[0][i], result_classes[i])
+            # Проверяем, что новая фигура правильно инициализирована
+            self.assertEqual(self.board[0][i].color, "white")
+            self.assertEqual(self.board[0][i].current_square, (0, i))
