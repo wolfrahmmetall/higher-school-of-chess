@@ -1,0 +1,70 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  font-family: "Arial", sans-serif;
+}
+
+.chess-board-container {
+  display: inline-block;
+  margin: 10px 20px 10px 0px;
+  text-align: left;
+  position: relative;
+}
+
+.board-row {
+  display: flex; /* Flexbox для устранения пробелов */
+  font-size: 18px; /* Убираем пробелы между клетками */
+}
+
+.board-cell {
+  flex-shrink: 0; /* Убираем возможность сжатия клетки */
+  display: block;
+  width: 3em;
+  height: 3em;
+  text-align: center;
+  position: relative;
+}
+
+.chess-piece {
+  width: 100%;
+  height: 100%;
+}
+
+.notation-row {
+  display: flex; /* Flexbox для упрощения размещения */
+  justify-content: space-between; /* Равномерное распределение */
+  font-size: 1em;
+  margin-bottom: 0.5em; /* Отступ */
+}
+
+.notation-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3em;
+  height: 3em;
+  line-height: 1;
+}
+
+.light-cell {
+  background-color: #f0d9b5; /* Светлый цвет клетки */
+}
+
+.dark-cell {
+  background-color: #b58863; /* Темный цвет клетки */
+}
+
+
+.light {
+  background-color: #f0d9b5; 
+}
+
+.dark {
+  background-color: #b58863;
+}
+
+.moves-list {
+  flex: 1;
+  text-align: center;
+}
