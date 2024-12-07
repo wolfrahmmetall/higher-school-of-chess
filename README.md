@@ -28,8 +28,13 @@ higher-school-of-chess$ cd frontend
 higher-school-of-chess/frontend$ npm run dev
 ```
 
-## Регистрация
+## Вход и регистрация
+#### Вход
+
 <img src="https://i.imghippo.com/files/uc6252vNo.jpg" alt="" border="0">
+
+#### Регистрация
+
 <img src="https://i.imghippo.com/files/nMlu4341Nk.jpg" alt="" border="0">
 
 ## Создание и присоединение к играм
@@ -41,6 +46,7 @@ higher-school-of-chess/frontend$ npm run dev
 
 ## Настройки игры
 Можно настроить время игры в минутах и прибавление после каждого хода (increment) в секундах
+
 <img src="https://i.imghippo.com/files/UjnM7449mSQ.jpg" alt="" border="0">
 
 ## Игра
