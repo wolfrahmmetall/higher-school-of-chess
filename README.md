@@ -13,7 +13,7 @@ $ cd path/to/directory/higher-school-of-chess
 (.venv) $ poetry install
 ```
 Из ```requirements.txt```
-```shell
+```shellbcrypt==4.2.1
 (.venv) $ pip install -r requirements.txt
 ```
 #### Запуск
