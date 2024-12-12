@@ -2,6 +2,11 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from fastapi.responses import JSONResponse
+from uuid import uuid4
+
+from sqlalchemy.orm import Session
+from dbpackage.session import SessionLocal
+from .game import Game
 
 from .pieces.piece import Piece
 
@@ -24,6 +29,35 @@ class GameSetup(BaseModel):
 class Move(BaseModel):
     start: str  # Начальная позиция, например "e2"
     end: str  # Конечная позиция, например "e4"
+    
+class NewGame(BaseModel):
+    uuid: str
+    white: str
+    black: str
+    result: Optional[int] = None
+    moves: List[str] = []
+
+@router.post("/games")
+async def create_game(new_game: NewGame):
+    """
+    Создает новую игру в базе данных.
+    """
+    async with SessionLocal() as db:  # Используем асинхронный контекст
+        try:
+            game = Game(
+                uuid=new_game.uuid,
+                white=new_game.white,
+                black=new_game.black,
+                result=new_game.result,
+                moves=new_game.moves
+            )
+            db.add(game)  # Добавление игры в сессию
+            await db.commit()  # Сохранение изменений
+            await db.refresh(game)  # Обновление объекта игры
+            return {"message": "Игра успешно создана", "game": game}
+        except Exception as e:
+            await db.rollback()  # Откат изменений в случае ошибки
+            raise HTTPException(status_code=500, detail=f"Ошибка при создании игры: {str(e)}")
 
 @router.post("/setup")
 def setup_game(settings: GameSetup):

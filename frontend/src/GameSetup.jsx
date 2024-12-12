@@ -21,6 +21,15 @@ const GameSetup = () => {
       
       if (response.status === 200) {
         console.log("Игра настроена:", response.data);
+
+        await axios.post("http://127.0.0.1:8000/chess/games", {
+          uuid: response.data.uuid, // Предполагается, что uuid возвращается от сервера
+          white: response.data.white_player_id, // ID белого игрока
+          black: response.data.black_player_id, // ID черного игрока
+          result: null, // Изначально результат неизвестен
+          moves: [], // Изначально список ходов пуст
+      });
+
         navigate("/game"); // Перенаправление на `/game`
       } else {
         throw new Error("Не удалось настроить игру");
