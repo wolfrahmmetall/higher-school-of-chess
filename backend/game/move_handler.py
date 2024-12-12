@@ -37,27 +37,7 @@ class NewGame(BaseModel):
     result: Optional[int] = None
     moves: List[str] = []
 
-@router.post("/games")
-async def create_game(new_game: NewGame):
-    """
-    Создает новую игру в базе данных.
-    """
-    async with SessionLocal() as db:  # Используем асинхронный контекст
-        try:
-            game = Game(
-                uuid=new_game.uuid,
-                white=new_game.white,
-                black=new_game.black,
-                result=new_game.result,
-                moves=new_game.moves
-            )
-            db.add(game)  # Добавление игры в сессию
-            await db.commit()  # Сохранение изменений
-            await db.refresh(game)  # Обновление объекта игры
-            return {"message": "Игра успешно создана", "game": game}
-        except Exception as e:
-            await db.rollback()  # Откат изменений в случае ошибки
-            raise HTTPException(status_code=500, detail=f"Ошибка при создании игры: {str(e)}")
+
 
 @router.post("/setup")
 def setup_game(settings: GameSetup):
