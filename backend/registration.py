@@ -6,7 +6,7 @@ from dbpackage.DBHelper import db_helper_user
 from dbpackage.Base import Base
 from api_v1 import router as router_v1
 from game import router as game_router
-from game.views import router as game_views_router
+from game.game_creation.views import router as game_views_router
 import uvicorn
 
 

@@ -13,7 +13,7 @@ const GameSetup = () => {
   const setupGame = async () => {
     setError(""); // Сброс предыдущей ошибки
     try {
-      const response = await axios.post("http://127.0.0.1:8000/chess/setup", {
+      const response = await axios.post(`${API_BASE}/setup`, {
         game_time: 10,
         increment: 5,
       });
@@ -22,7 +22,7 @@ const GameSetup = () => {
       if (response.status === 200) {
         console.log("Игра настроена:", response.data);
 
-        await axios.post("http://127.0.0.1:8000/chess/games", {
+        await axios.post(`${API_BASE}/games`, {
           uuid: response.data.uuid, // Предполагается, что uuid возвращается от сервера
           white: response.data.white_player_id, // ID белого игрока
           black: response.data.black_player_id, // ID черного игрока

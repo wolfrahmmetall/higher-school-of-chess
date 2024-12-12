@@ -37,6 +37,7 @@ class NewGame(BaseModel):
     result: Optional[int] = None
     moves: List[str] = []
 
+# надо сделать жесточайшую поправку на то, что нам надо поддерживать кучу инстансов игр
 @router.post("/games")
 async def create_game(new_game: NewGame):
     """
@@ -59,6 +60,7 @@ async def create_game(new_game: NewGame):
             await db.rollback()  # Откат изменений в случае ошибки
             raise HTTPException(status_code=500, detail=f"Ошибка при создании игры: {str(e)}")
 
+# после этого игра должна создаваться
 @router.post("/setup")
 def setup_game(settings: GameSetup):
     """
@@ -76,6 +78,11 @@ def setup_game(settings: GameSetup):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при настройке игры: {str(e)}")
 
+
+# игра должна быть получена по game_id: uuid
+# @router.get("/{user_id}/state")
+# def get_game_state(user_id: str) -> Dict[str, Any]:
+# и все функции надо переписать на такие адреса
 @router.get("/state")
 def get_game_state() -> Dict[str, Any]:
     """

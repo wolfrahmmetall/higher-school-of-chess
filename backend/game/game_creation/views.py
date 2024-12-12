@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from dbpackage.session import SessionLocal
-from .crud import create_game, get_game, get_games, update_game, delete_game
+from ..game import create_game, get_game, get_games, update_game, delete_game
 from pydantic import BaseModel
 from typing import List, Optional
 

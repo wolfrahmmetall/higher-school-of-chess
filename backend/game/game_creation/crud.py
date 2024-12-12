@@ -1,21 +1,21 @@
 # backend/game/crud.py
 from sqlalchemy.orm import Session
-from .game import Game
+from ..game_creation import Game
 from pydantic import BaseModel
 from typing import List, Optional
 
 class GameCreate(BaseModel):
     uuid: str
-    white: str
-    black: str
+    white: int # id игрока в БД -- инт
+    black: int # id игрока в БД -- инт
     result: Optional[int] = None
     moves: List[str] = []
 
 def create_game(db: Session, game: GameCreate):
     db_game = Game(
         uuid=game.uuid,
-        white=game.white,
-        black=game.black,
+        white=game.white, # id игрока
+        black=game.black, # id игрока
         result=game.result,
         moves=game.moves
     )
