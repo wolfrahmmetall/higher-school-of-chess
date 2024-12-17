@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from dbpackage.DBHelper import db_helper_user
+from api_v1.user.User import User
+from game.game_creation.Game import Games
+from dbpackage.DBHelper import db_helper_user, db_helper_game
 from dbpackage.Base import Base
 from api_v1 import router as router_v1
 from game import router as game_router
@@ -13,7 +15,11 @@ import uvicorn
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with db_helper_user.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(User.metadata.create_all)
+    
+    async with db_helper_game.engine.begin() as conn:
+        await conn.run_sync(Games.metadata.create_all)
+
     yield
 
 
