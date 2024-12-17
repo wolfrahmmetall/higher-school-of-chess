@@ -1,18 +1,26 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    // Извлекаем токен из локального хранилища при загрузке
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
 
   const login = (newToken) => {
     setToken(newToken);
-    localStorage.setItem("token", newToken);
+    localStorage.setItem("authToken", newToken);
   };
 
   const logout = () => {
     setToken(null);
-    localStorage.removeItem("token");
+    localStorage.removeItem("authToken");
   };
 
   return (

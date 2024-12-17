@@ -6,31 +6,35 @@ const GameSetup = () => {
   const [gameTime, setGameTime] = useState(10); // Default game time in minutes
   const [increment, setIncrement] = useState(5); // Default increment in seconds
   const [error, setError] = useState(""); // Для отображения ошибок
+  const [playerSide, setPlayerSide] = useState("white"); // Выбранная сторона: "white" или "black"
   const navigate = useNavigate();
 
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://127.0.0.1:8000/chess";
 
   const setupGame = async () => {
     setError(""); // Сброс предыдущей ошибки
     try {
-      const response = await axios.post(`${API_BASE}/setup`, {
-        game_time: 10,
-        increment: 5,
-      });
-      console.log("Ответ от сервера:", response.data);
-      
+      const token = localStorage.getItem("authToken"); // Токен аутентификации из localStorage
+      console.log(token)
+      if (!token) {
+        throw new Error("Вы не авторизованы.");
+      }
+
+      const headers = { Authorization: `Bearer ${token}` }; // Передаем токен в заголовке
+
+      const response = await axios.post(
+        `${API_BASE}/setup`,
+        {
+          white: playerSide === "white", // Отправляем, за кого хочет играть пользователь
+          black: playerSide === "black",
+        },
+        { headers }
+      );
+
       if (response.status === 200) {
+        const { uuid } = response.data; // Получаем UUID игры из ответа
         console.log("Игра настроена:", response.data);
-
-        await axios.post(`${API_BASE}/games`, {
-          uuid: response.data.uuid, // Предполагается, что uuid возвращается от сервера
-          white: response.data.white_player_id, // ID белого игрока
-          black: response.data.black_player_id, // ID черного игрока
-          result: null, // Изначально результат неизвестен
-          moves: [], // Изначально список ходов пуст
-      });
-
-        navigate("/game"); // Перенаправление на `/game`
+        navigate(`/chess/${uuid}/`); // Перенаправляем на страницу с UUID
       } else {
         throw new Error("Не удалось настроить игру");
       }
@@ -39,7 +43,6 @@ const GameSetup = () => {
       setError("Не удалось настроить игру. Проверьте сервер.");
     }
   };
-  
 
   return (
     <div className="game-setup">
@@ -62,6 +65,13 @@ const GameSetup = () => {
           onChange={(e) => setIncrement(parseInt(e.target.value))}
           min="0"
         />
+      </label>
+      <label>
+        Выберите сторону:
+        <select value={playerSide} onChange={(e) => setPlayerSide(e.target.value)}>
+          <option value="white">Белые</option>
+          <option value="black">Черные</option>
+        </select>
       </label>
       <button onClick={setupGame}>Начать игру</button>
     </div>

@@ -8,7 +8,6 @@ from dbpackage.DBHelper import db_helper_user, db_helper_game
 from dbpackage.Base import Base
 from api_v1 import router as router_v1
 from game import router as game_router
-from game.game_creation.views import router as game_views_router
 import uvicorn
 
 
@@ -27,7 +26,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=router_v1)
 app.include_router(router=game_router)
-app.include_router(router=game_views_router)
 
 origins = [
     "http://127.0.0.1",
@@ -43,14 +41,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.get('/')
-def hello_api():
-    return {'msg':'hello_api'}
-
-@app.get('/items')
-def show_leaderboard():
-    return ('Aalik', 'IvanZ')
 
 if __name__ == '__main__':
     # path = Path('backend/databases').resolve()
