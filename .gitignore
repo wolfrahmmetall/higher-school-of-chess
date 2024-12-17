@@ -165,5 +165,5 @@ cython_debug/
 
 demo_auth/
 # databases/
-certificates/
+# certificates/
 .DS_Store
