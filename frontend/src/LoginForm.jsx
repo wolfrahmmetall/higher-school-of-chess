@@ -14,7 +14,7 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await fetch('http://5.35.5.18/users/login', {
+      const response = await fetch('http://5.35.5.18/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password }),

@@ -13,7 +13,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://5.35.5.18/users/login", {
+      const response = await axios.post("http://5.35.5.18/api/users/login", {
         login,
         password,
       });
