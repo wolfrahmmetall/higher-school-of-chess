@@ -1,26 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('authToken') || null);
+  const navigate = useNavigate();
 
+  // Проверяем наличие токена при запуске
   useEffect(() => {
-    // Извлекаем токен из локального хранилища при загрузке
-    const storedToken = localStorage.getItem("authToken");
-    if (storedToken) {
-      setToken(storedToken);
+    if (token) {
+      localStorage.setItem('authToken', token);
+    } else {
+      localStorage.removeItem('authToken');
     }
-  }, []);
+  }, [token]);
 
   const login = (newToken) => {
     setToken(newToken);
-    localStorage.setItem("authToken", newToken);
+    localStorage.setItem('authToken', newToken);
+    navigate('/dashboard'); // Перенаправляем на дашборд после логина
   };
 
   const logout = () => {
     setToken(null);
-    localStorage.removeItem("authToken");
+    localStorage.removeItem('authToken');
+    navigate('/login'); // Возвращаем на страницу логина
   };
 
   return (
