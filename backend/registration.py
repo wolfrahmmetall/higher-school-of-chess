@@ -47,5 +47,5 @@ if __name__ == '__main__':
     # path = Path('backend/databases').resolve()
     # print(path)
     # print(path.is_dir())
-    uvicorn.run("registration:app", reload=True)
+    uvicorn.run("registration:app", host="0.0.0.0", port=8000, reload=True)
     # print(Path(__file__).parent)
