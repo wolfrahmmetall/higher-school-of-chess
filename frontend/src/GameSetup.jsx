@@ -9,7 +9,7 @@ const GameSetup = () => {
   const [playerSide, setPlayerSide] = useState("white"); // Выбранная сторона: "white" или "black"
   const navigate = useNavigate();
 
-  const API_BASE = "http://127.0.0.1:8000/chess";
+  const API_BASE = "http://5.35.5.18/chess";
 
   const setupGame = async () => {
     setError(""); // Сброс предыдущей ошибки

@@ -37,7 +37,7 @@ const Game = () => {
   const [endSquare, setEndSquare] = useState("");
   const [gameResult, setGameResult] = useState(null);
 
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18";
 
   const prepareBoard = (board) => {
     return board.map((row) =>
