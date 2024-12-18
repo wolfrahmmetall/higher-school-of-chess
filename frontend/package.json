@@ -2,7 +2,7 @@
   "name": "my-react-app",
   "private": true,
   "version": "0.0.0",
-  "base": "https://gitname.github.io/react-gh-pages",
+  "homepage": "https://gitname.github.io/react-gh-pages",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
