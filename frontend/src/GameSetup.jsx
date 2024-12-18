@@ -9,7 +9,7 @@ const GameSetup = () => {
   const [playerSide, setPlayerSide] = useState("white"); // Выбранная сторона: "white" или "black"
   const navigate = useNavigate();
 
-  const API_BASE = "http://5.35.5.18/api/chess";
+  const API_BASE = "http://127.0.0.1:8000/chess";
 
   const setupGame = async () => {
     setError(""); // Сброс предыдущей ошибки
@@ -34,6 +34,7 @@ const GameSetup = () => {
       if (response.status === 200) {
         const { uuid } = response.data; // Получаем UUID игры из ответа
         console.log("Игра настроена:", response.data);
+        localStorage.setItem("game_uuid", response.data)
         navigate(`/chess/${uuid}/`); // Перенаправляем на страницу с UUID
       } else {
         throw new Error("Не удалось настроить игру");

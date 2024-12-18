@@ -47,7 +47,8 @@ const Game = () => {
 
   const fetchGameState = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/chess/state`);
+      uuid = localStorage.getItem("game_uuid")
+      const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
     } catch (error) {
