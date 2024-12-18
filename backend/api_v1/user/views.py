@@ -51,24 +51,16 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 @router.post('/login', response_model=dict)
 async def login(user_in: LoginUser, session: AsyncSession = Depends(db_helper_user.scoped_session_dependency)):
-    print("Полученные данные для логина:", user_in)
     # Ищем пользователя по логину
     user = await crud.get_user_by_login(session=session, login=user_in.login)
-    print("Пользователь из базы данных:", user)
-    
     if user is None:
-        print("Ошибка: пользователь не найден")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный логин или пароль"
         )
     
     # Проверяем пароль
-    print("Введённый пароль:", user_in.password)
-    print("Хранимый хэш пароля:", user.password)
-    
     if not validate_password(user_in.password, user.password):
-        print("Ошибка: пароли не совпадают")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный логин или пароль"
@@ -80,7 +72,6 @@ async def login(user_in: LoginUser, session: AsyncSession = Depends(db_helper_us
         "login": user.login,  # Дополнительная информация
     }
     token = create_access_token(data=token_data)
-    print("Токен успешно создан:", token)
 
     return {"access_token": token}
 
