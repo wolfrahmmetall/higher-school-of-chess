@@ -27,7 +27,7 @@ const LoginForm = () => {
       }
 
       const data = await response.json();
-      authenticate(data.token); // Сохраняем токен
+      authenticate(data.access_token); // Сохраняем токен
       navigate('/dashboard');  // Переход на защищённую страницу
     } catch (error) {
       setError('Something went wrong. Please try again.');
