@@ -27,9 +27,18 @@ const LoginForm = () => {
       }
 
       const data = await response.json();
-      authenticate(data.access_token); // Сохраняем токен
-      navigate('/dashboard');  // Переход на защищённую страницу
+      console.log('Полученный токен:', data.access_token);
+
+      // Сохраняем токен в localStorage
+      localStorage.setItem('token', data.access_token);
+
+      // Аутентифицируем пользователя (если используется контекст)
+      authenticate(data.access_token);
+
+      // Перенаправляем на дашборд
+      navigate('/dashboard');
     } catch (error) {
+      console.error('Ошибка логина:', error);
       setError('Something went wrong. Please try again.');
     }
   };
