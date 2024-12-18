@@ -28,3 +28,9 @@ services:
       context: ./frontend
     networks:
       - dev
+
+deploy:
+  resources:
+    limits:
+      memory: 256M
+      cpus: "0.3"

@@ -28,7 +28,7 @@ app.include_router(router=router_v1)
 app.include_router(router=game_router)
 
 origins = [
-    'http://5.35.5.18',
+    "http://5.35.5.18",
     "http://127.0.0.1",
     "http://127.0.0.1:8000",
     "http://localhost:8080",
