@@ -40,7 +40,7 @@ const Game = () => {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api";
 
   const prepareBoard = (board) => {
     return board.map((row) =>
