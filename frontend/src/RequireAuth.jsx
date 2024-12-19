@@ -6,8 +6,9 @@ const RequireAuth = ({ children }) => {
   const { token } = useAuth();
   const location = useLocation();
 
+  console.log("Текущий токен:", token);
+
   if (!token) {
-    // Сохраняем текущую страницу для возврата после входа
     console.log("Пользователь не авторизован. Перенаправление на /login.");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

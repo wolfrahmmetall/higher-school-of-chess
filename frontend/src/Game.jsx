@@ -95,8 +95,10 @@ const Game = () => {
   };
 
   useEffect(() => {
-    fetchGameState();
-  }, []);
+    if (uuid) {
+      fetchGameState();
+    }
+  }, [uuid]);
 
   return (
     <div className="game-container">

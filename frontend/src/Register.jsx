@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
 import axios from "axios";
 
 const Register = () => {
@@ -8,6 +9,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login: authenticate } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,10 +21,20 @@ const Register = () => {
         password,
         email,
       });
-      localStorage.setItem("token", response.data.access_token);
-      navigate("/dashboard");
+
+      const token = response.data.access_token;
+
+      if (token) {
+        console.log("Полученный токен:", token);
+        authenticate(token); // Сохраняем токен в контексте
+        console.log("Навигация на дашборд");
+        navigate("/dashboard");
+      } else {
+        setError("Ошибка регистрации. Токен отсутствует.");
+      }
     } catch (err) {
-      setError(err.response?.data?.detail || "Registration failed");
+      console.error("Ошибка при регистрации:", err);
+      setError(err.response?.data?.detail || "Ошибка регистрации.");
     }
   };
 
@@ -30,14 +42,32 @@ const Register = () => {
     <div>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Login" value={login} onChange={(e) => setLogin(e.target.value)} required/>
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required/>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
+        <input
+          type="text"
+          placeholder="Login"
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit">Register</button>
       </form>
       <p>
-        Уже есть аккаунт? <a href="http://5.35.5.18/login">Войдите</a>
+        Уже есть аккаунт? <Link to="/login">Войдите</Link>
       </p>
     </div>
   );

@@ -11,29 +11,30 @@ const Login = () => {
   const API_BASE = "http://127.0.0.1:8000"
   // const API_BASE = "http://5.35.5.18/api";
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await axios.post(`${API_BASE}/users/login`, {
-        login,
-        password,
-      });
+  try {
+    const response = await axios.post("http://5.35.5.18/api/users/login", {
+      login,
+      password,
+    });
 
-      const token = response.data.access_token;
+    const token = response.data.access_token;
 
-      // Сохраняем токен в локальном хранилище
-      localStorage.setItem("authToken", token);
-      console.log(localStorage.getItem("authToken"))
-
-      // Перенаправляем пользователя на защищенную страницу
+    if (token) {
+      authenticate(token); // Вызов метода login из AuthProvider
+      console.log("Навигация на дашборд");
       navigate("/dashboard");
-    } catch (err) {
-      console.error("Ошибка при логине:", err.response?.data);
-      setError(err.response?.data?.detail || "Ошибка авторизации. Проверьте введенные данные.");
+    } else {
+      setError("Ошибка авторизации. Токен отсутствует.");
     }
-  };
+  } catch (err) {
+    console.error("Ошибка при логине:", err.response?.data);
+    setError(err.response?.data?.detail || "Ошибка авторизации.");
+  }
+};
 
   return (
     <div>
