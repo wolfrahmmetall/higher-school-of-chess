@@ -40,7 +40,8 @@ const Game = () => {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  const API_BASE = "http://127.0.0.1:8000"; // Адрес API
+  // const API_BASE = "http://5.35.5.18/api";
+  const API_BASE = "http://127.0.0.1:8000"
 
   const prepareBoard = (board) => {
     console.log("Preparing board:", board); // Лог текущей доски
