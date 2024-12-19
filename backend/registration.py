@@ -14,11 +14,11 @@ import uvicorn
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with db_helper_user.engine.begin() as conn:
-        # await conn.run_sync(User.metadata.drop_all)
+        await conn.run_sync(User.metadata.drop_all)
         await conn.run_sync(User.metadata.create_all)
     
     async with db_helper_game.engine.begin() as conn:
-        # await conn.run_sync(Games.metadata.drop_all)
+        await conn.run_sync(Games.metadata.drop_all)
         await conn.run_sync(Games.metadata.create_all)
 
     yield
