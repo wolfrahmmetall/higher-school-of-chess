@@ -8,12 +8,15 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const API_BASE = "http://127.0.0.1:8000"
+  // const API_BASE = "http://5.35.5.18/api";
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/users/login", {
+      const response = await axios.post(`${API_BASE}/users/login`, {
         login,
         password,
       });

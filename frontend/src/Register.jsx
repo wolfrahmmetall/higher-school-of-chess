@@ -37,7 +37,7 @@ const Register = () => {
         <button type="submit">Register</button>
       </form>
       <p>
-        Уже есть аккаунт? <a href="/login">Войдите</a>
+        Уже есть аккаунт? <a href="http://5.35.5.18/login">Войдите</a>
       </p>
     </div>
   );
