@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "./AuthProvider";
 
 const Login = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { login: authenticate } = useAuth();
   const navigate = useNavigate();
 
   const API_BASE = "http://127.0.0.1:8000";
@@ -30,9 +32,8 @@ const Login = () => {
         const token = response.data.access_token;
         console.log("Токен получен:", token);
 
-        // Сохраняем токен в локальном хранилище
-        localStorage.setItem("authToken", token);
-        console.log("Токен сохранён в localStorage:", localStorage.getItem("authToken"));
+        // Сохраняем токен через AuthProvider для синхронизации состояния
+        authenticate(token);
 
         // Перенаправляем пользователя на защищенную страницу
         console.log("Перенаправление на /dashboard");
