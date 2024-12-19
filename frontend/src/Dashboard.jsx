@@ -10,12 +10,19 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    console.log("Логаут: Выход пользователя."); // Лог выхода
     logout();
     navigate("/login");
+    console.log("Перенаправление на /login."); // Лог перенаправления
   };
+
   const handleNewGame = () => {
+    console.log("Создание новой игры."); // Лог создания новой игры
     navigate("/game/setup");
+    console.log("Перенаправление на /game/setup."); // Лог перенаправления
   };
+
+  console.log("Отображение дашборда."); // Лог при монтировании компонента
 
   return (
     <div className="container">
@@ -39,6 +46,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

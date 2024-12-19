@@ -8,12 +8,15 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const API_BASE = "http://127.0.0.1:8000"
+  const API_BASE = "http://127.0.0.1:8000";
   // const API_BASE = "http://5.35.5.18/api";
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    console.log("Попытка входа с данными:");
+    console.log("Логин:", login);
+    console.log("Пароль:", password);
 
     try {
       const response = await axios.post(`${API_BASE}/users/login`, {
@@ -21,16 +24,25 @@ const Login = () => {
         password,
       });
 
-      const token = response.data.access_token;
+      console.log("Ответ от сервера:", response);
 
-      // Сохраняем токен в локальном хранилище
-      localStorage.setItem("authToken", token);
-      console.log(localStorage.getItem("authToken"))
+      if (response.data.access_token) {
+        const token = response.data.access_token;
+        console.log("Токен получен:", token);
 
-      // Перенаправляем пользователя на защищенную страницу
-      navigate("/dashboard");
+        // Сохраняем токен в локальном хранилище
+        localStorage.setItem("authToken", token);
+        console.log("Токен сохранён в localStorage:", localStorage.getItem("authToken"));
+
+        // Перенаправляем пользователя на защищенную страницу
+        console.log("Перенаправление на /dashboard");
+        navigate("/dashboard");
+      } else {
+        console.error("Токен отсутствует в ответе сервера");
+        setError("Авторизация не удалась. Токен отсутствует.");
+      }
     } catch (err) {
-      console.error("Ошибка при логине:", err.response?.data);
+      console.error("Ошибка при логине:", err.response?.data || err.message);
       setError(err.response?.data?.detail || "Ошибка авторизации. Проверьте введенные данные.");
     }
   };

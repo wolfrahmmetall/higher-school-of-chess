@@ -40,32 +40,36 @@ const Game = () => {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  // const API_BASE = "http://5.35.5.18/api";
-  const API_BASE = "http://127.0.0.1:8000"
+  const API_BASE = "http://127.0.0.1:8000"; // Адрес API
 
   const prepareBoard = (board) => {
+    console.log("Preparing board:", board); // Лог текущей доски
     return board.map((row) =>
       row.map((cell) => (cell && typeof cell === "object" ? cell.name : cell || ""))
     );
   };
 
   const fetchGameState = async () => {
+    console.log("Fetching game state for UUID:", uuid);
     try {
       const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
+      console.log("Game state fetched successfully:", response.data);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
     } catch (error) {
-      console.error("Ошибка при получении состояния игры:", error);
+      console.error("Error fetching game state:", error);
     }
   };
 
   const makeMove = async (start, end) => {
+    console.log("Making move from:", start, "to:", end);
     try {
       if (start && end) {
         const response = await axios.post(`${API_BASE}/chess/${uuid}/move`, {
           start: start,
           end: end,
         });
+        console.log("Move successful, response:", response.data);
         setBoard(prepareBoard(response.data.board));
         setCurrentTurn(response.data.current_turn);
         setGameResult(response.data.result);
@@ -74,7 +78,7 @@ const Game = () => {
         setSelectedSquare(null);
       }
     } catch (error) {
-      console.error("Ошибка при выполнении хода:", error);
+      console.error("Error making move:", error);
     }
   };
 
@@ -83,11 +87,15 @@ const Game = () => {
     const rank = 8 - rowIndex; // 8-1
     const square = `${file}${rank}`;
 
+    console.log("Square clicked:", square);
+
     if (!startSquare) {
+      console.log("Start square selected:", square);
       setStartSquare(square);
       setSelectedSquare(square);
     } else {
       if (square !== startSquare) {
+        console.log("End square selected:", square);
         setEndSquare(square);
         makeMove(startSquare, square);
       }
@@ -95,6 +103,7 @@ const Game = () => {
   };
 
   useEffect(() => {
+    console.log("Component mounted, fetching game state.");
     fetchGameState();
   }, []);
 
