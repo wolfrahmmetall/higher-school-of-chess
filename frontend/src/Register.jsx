@@ -22,18 +22,9 @@ const Register = () => {
         password,
         email,
       });
-
       console.log("Ответ сервера:", response.data);
-
-      if (response.data?.access_token) {
-        localStorage.setItem("token", response.data.access_token);
-        console.log("Токен сохранен в localStorage:", response.data.access_token);
-        navigate("/dashboard");
-        console.log("Перенаправление на /dashboard выполнено.");
-      } else {
-        console.error("Токен отсутствует в ответе сервера:", response.data);
-        setError("Ошибка регистрации. Токен отсутствует.");
-      }
+      navigate("/dashboard");
+      console.log("Перенаправление на /dashboard выполнено.");
     } catch (err) {
       console.error("Ошибка регистрации:", err.response?.data || err.message);
       setError(err.response?.data?.detail || "Registration failed");
