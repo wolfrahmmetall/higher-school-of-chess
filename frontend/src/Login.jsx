@@ -21,8 +21,8 @@ const Login = () => {
       const token = response.data.access_token;
 
       // Сохраняем токен в локальном хранилище
-      localStorage.setItem("token", token);
-      console.log(localStorage.getItem("token"))
+      localStorage.setItem("authToken", token);
+      console.log(localStorage.getItem("authToken"))
 
       // Перенаправляем пользователя на защищенную страницу
       navigate("/dashboard");
