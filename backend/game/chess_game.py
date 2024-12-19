@@ -15,6 +15,8 @@ class ChessGame:
     def __init__(self, game_time, increment) -> None:
         self.white_timer = game_time
         self.black_timer = game_time
+        self.white: int | None = None
+        self.black: int | None = None
         self.increment = increment
         self.current_player_color: PieceColor = "white"
         self.board = Board()

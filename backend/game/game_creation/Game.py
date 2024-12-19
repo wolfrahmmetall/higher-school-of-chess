@@ -1,27 +1,43 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import uuid4
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, Float, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.sqlite import JSON
 from dbpackage.Base import Base
 
 class Games(Base):
-    # Публичный идентификатор (uuid), который не является первичным ключом
-    # id: Mapped[int] = mapped_column(primary_key=True)
+    """
+    Таблица для хранения данных об играх.
+    """
+    # Уникальный идентификатор игры
     uuid: Mapped[str] = mapped_column(String, unique=True, default=lambda: str(uuid4()))
 
-    # Данные игры
-    white: Mapped[Optional[int]] = mapped_column(nullable=True)  # ID игрока (int)
-    black: Mapped[Optional[int]] = mapped_column(nullable=True)  # ID игрока (int)
-    result: Mapped[Optional[int]] = mapped_column(nullable=True)  # Результат игры
-    moves: Mapped[list] = mapped_column(JSON)  # Ходы игры (храним как JSON)
+    # Игроки
+    white: Mapped[Optional[int]] = mapped_column(nullable=True)  # ID игрока, играющего за белых
+    black: Mapped[Optional[int]] = mapped_column(nullable=True)  # ID игрока, играющего за черных
 
-# 2024-12-17 18:48:09,871 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-# 2024-12-17 18:48:09,873 INFO sqlalchemy.engine.Engine SELECT user.login, user.password, user.email, user.elo_score, user.id 
-# FROM user 
-# WHERE user.login = ?
-# 2024-12-17 18:48:09,874 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('string',)
-# 2024-12-17 18:48:09,875 INFO sqlalchemy.engine.Engine INSERT INTO user (login, password, email, elo_score) VALUES (?, ?, ?, ?)
-# 2024-12-17 18:48:09,875 INFO sqlalchemy.engine.Engine [generated in 0.00008s] ('string', <memory at 0x1045750c0>, 'user@example.com', 1000.0)
-# 2024-12-17 18:48:09,875 INFO sqlalchemy.engine.Engine COMMIT
-# INFO:     127.0.0.1:50465 - "POST /users/register HTTP/1.1" 200 OK
+    # Результат игры (0 - не завершена, 1 - белые победили, 2 - черные победили, 3 - ничья)
+    result: Mapped[Optional[int]] = mapped_column(Integer, default=0, nullable=False)
+
+    # Ходы игры
+    board: Mapped[List[List[str]]] = mapped_column(JSON, default=list)  # Список ходов в формате "e2-e4"
+
+    # Дополнительные параметры игры
+    game_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Общее время на партию (в минутах)
+    increment: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Добавление времени после каждого хода (в секундах)
+
+    # Времена таймеров для игроков
+    # white_timer: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # black_timer: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Текущий ход
+    current_player_color: Mapped[str] = mapped_column(String, default="white", nullable=False)  # "white" или "black"
+
+    # Статус игры (идет/завершена)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    def __repr__(self):
+        return (
+            f"<Game(uuid={self.uuid}, white={self.white}, black={self.black}, result={self.result}, "
+            f"moves={self.moves}, current_player_color={self.current_player_color})>"
+        )

@@ -1,89 +1,126 @@
-import logging
-import uuid
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import UUID4, BaseModel
-from typing import List, Optional
+from typing import Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from pydantic import BaseModel
+from uuid import UUID, uuid4
+from api_v1.user.views import get_current_user, get_current_user_id
 from dbpackage.DBHelper import db_helper_game
-from game.game_creation.crud import GameCreate, create_game, get_game, update_game
-from api_v1.user.User import User
-from api_v1.user.views import get_current_user
+from game.game_creation.crud import create_game, get_game, update_game
+from game.chess_game import ChessGame
+
 router = APIRouter()
+
+# Хранилище активных игр
+active_games: Dict[str, ChessGame] = {}
 
 class Move(BaseModel):
     start: str  # Начальная позиция, например "e2"
     end: str  # Конечная позиция, например "e4"
 
-class GameCreateRequest(BaseModel):
-    # uuid: str
-    white: Optional[int] = None
-    black: Optional[int] = None
-
-class GameOut(BaseModel):
-    uuid: str
-    white: Optional[int] # ID игрока (int)
-    black: Optional[int] # ID игрока (int)
-    result: Optional[int] # Результат игры
-    moves: list # Ходы игры (храним как JSON)
+class GameSetup(BaseModel):
+    game_time: int  # Время на партию в минутах
+    increment: int  # Инкремент в секундах
+    white: bool
+    black: bool
 
 
-# @router.post("/setup/", response_model=GameOut)
-@router.post("/setup/")
-async def create_new_game(
-    game_request: GameCreateRequest,
-    db: AsyncSession = Depends(db_helper_game.scoped_session_dependency),
-    current_user: User = Depends(get_current_user),  # Получаем текущего пользователя
-):
-    """Создает новую игру."""
-    print(current_user.login, current_user.id)
-    if game_request.white and game_request.black:
-        raise HTTPException(status_code=400, detail="Нельзя одновременно указать обоих игроков как белого и черного.")
-    
-    # Устанавливаем сторону на основе запроса
-    white = current_user.id if game_request.white else None
-    black = current_user.id if game_request.black else None
+@router.post("/setup")
+async def setup_game(settings: GameSetup,
+               session: AsyncSession = Depends(db_helper_game.scoped_session_dependency),
+               curr_user: int = Depends(get_current_user_id)):
+    """
+    Настраивает новую игру с указанными параметрами.
+    """
+    uuid = str(uuid4())
+    # try:
+    game = ChessGame(settings.game_time,
+                         settings.increment)
+        # if settings.white:
+        #     game.white = curr_user
+        # if settings.black:
+        #     game.black = curr_user
 
-    game = GameCreate(
-        uuid=str(uuid.uuid4()),
-        white=white,
-        black=black,
-    )
-    game_data = await create_game(db=db, game=game)
-    return game_data
+    game.start_game()  # Инициализация игры
+    active_games[uuid] = game
+    await create_game(session, game)
+    return {
+        "message": "Игра настроена",
+        "uuid": uuid,
+        "game_time": settings.game_time,
+        "increment": settings.increment,
+    }
+    # except Exception as e:
+    #     print(str(e))
+        # raise HTTPException(status_code=500, detail=f"Ошибка при настройке игры: {str(e)}")
 
-@router.get("/{uuid}/")
-async def fetch_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)):
-    """Получает данные игры по UUID."""
-    game = await get_game(db=db, game_uuid=uuid)
+
+@router.post("/{uuid}/move")
+async def make_move(uuid: str, move: Move, 
+                    session: AsyncSession = Depends(db_helper_game.scoped_session_dependency),
+                    # curr_user: int = Depends(get_current_user_id)
+                    ) -> Dict[str, Any]:
+    """
+    Обрабатывает ход в игре.
+    """
+    game = active_games.get(uuid)
+    if game is None:
+        raise HTTPException(status_code=404, detail="Игра не найдена")
+
+    try:
+        # if curr_user != game.white or curr_user != game.black:
+        #     return {
+        #     "board": game.board,
+        #     "current_turn": game.current_player_color,
+        #     "result": game.result,
+        # }
+        game.move(move.start, move.end)
+        board_state: List[List[str]] = [
+            # [piece.name() if piece else '\uA900' for piece in row]
+            [piece.name() if piece else '\u00A0' for piece in row]
+            for row in game.board.board
+        ]
+        active_games[uuid] = game
+        return {
+            "board": board_state,
+            "current_turn": game.current_player_color,
+            "result": game.result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка при обработке хода: {str(e)}")
+
+@router.get("/{uuid}/state")
+async def get_game_state(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> Dict[str, Any]:
+    """
+    Возвращает текущее состояние доски и информацию об игре.
+    """
+    game = active_games.get(uuid)
     if not game:
         raise HTTPException(status_code=404, detail="Игра не найдена")
-    return game
 
-@router.put("/{uuid}/")
-async def update_existing_game(uuid: str, game_request: GameCreateRequest, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)):
-    """Обновляет существующую игру."""
-    updated_game = await update_game(session=db, game_uuid=uuid, game_data=game_request)
-    if not updated_game:
+    board_state: List[List[str]] = [
+        [piece.name() if piece else '\u00A0' for piece in row]
+        for row in game.board.board
+    ]
+
+    return {
+        "uuid": uuid,
+        "board": board_state,
+        "current_turn": game.current_player_color,
+        "white_timer": game.white_timer,
+        "black_timer": game.black_timer,
+        "result": game.result,
+    }
+
+@router.delete("/{uuid}/delete")
+async def delete_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> Dict[str, str]:
+    """
+    Удаляет игру из активного списка и базы данных.
+    """
+    if uuid in active_games:
+        del active_games[uuid]
+
+    deleted = await delete_game(db, game_uuid=uuid)
+    if not deleted:
         raise HTTPException(status_code=404, detail="Игра не найдена")
-    return updated_game
 
-@router.post("/{uuid}/move/")
-async def make_game_move(uuid: str, move: Move, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)):
-    """Добавляет ход в существующую игру."""
-    game = await get_game(db=db, game_uuid=uuid)
-    if not game:
-        raise HTTPException(status_code=404, detail="Игра не найдена")
-
-    # Логика обновления ходов
-    moves = game.moves or []
-    moves.append(f"{move.start}-{move.end}")
-
-    await update_game(session=db, game_uuid=uuid, game_data=GameCreateRequest(
-        uuid=game.uuid,
-        white=game.white,
-        black=game.black,
-        moves=moves
-    ))
-
-    return {"message": "Ход выполнен", "moves": moves}
+    return {"message": "Игра удалена"}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import './Game.css';
 import whitepawn from './assets/white-pawn.png';
 import whiteknight from './assets/white-knight.png';
@@ -30,14 +31,16 @@ const pieceMapping = {
 };
 
 const Game = () => {
+  const { uuid } = useParams(); // Получаем UUID из параметров маршрута
   const [board, setBoard] = useState([]);
   const [currentTurn, setCurrentTurn] = useState("");
   const [gameStatus, setGameStatus] = useState("");
   const [startSquare, setStartSquare] = useState("");
   const [endSquare, setEndSquare] = useState("");
+  const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  const API_BASE = "http://5.35.5.18/api";
+  const API_BASE = "http://127.0.0.1:8000";
 
   const prepareBoard = (board) => {
     return board.map((row) =>
@@ -47,7 +50,6 @@ const Game = () => {
 
   const fetchGameState = async () => {
     try {
-      uuid = localStorage.getItem("game_uuid")
       const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
@@ -56,19 +58,38 @@ const Game = () => {
     }
   };
 
-  const makeMove = async () => {
+  const makeMove = async (start, end) => {
     try {
-      const response = await axios.post(`${API_BASE}/chess/move`, {
-        start: startSquare,
-        end: endSquare,
-      });
-      setBoard(prepareBoard(response.data.board));
-      setCurrentTurn(response.data.current_turn);
-      setGameResult(response.data.result);
-      setStartSquare("");
-      setEndSquare("");
+      if (start && end) {
+        const response = await axios.post(`${API_BASE}/chess/${uuid}/move`, {
+          start: start,
+          end: end,
+        });
+        setBoard(prepareBoard(response.data.board));
+        setCurrentTurn(response.data.current_turn);
+        setGameResult(response.data.result);
+        setStartSquare("");
+        setEndSquare("");
+        setSelectedSquare(null);
+      }
     } catch (error) {
       console.error("Ошибка при выполнении хода:", error);
+    }
+  };
+
+  const handleSquareClick = (rowIndex, colIndex) => {
+    const file = String.fromCharCode(97 + colIndex); // a-h
+    const rank = 8 - rowIndex; // 8-1
+    const square = `${file}${rank}`;
+
+    if (!startSquare) {
+      setStartSquare(square);
+      setSelectedSquare(square);
+    } else {
+      if (square !== startSquare) {
+        setEndSquare(square);
+        makeMove(startSquare, square);
+      }
     }
   };
 
@@ -103,7 +124,8 @@ const Game = () => {
                 key={colIndex}
                 className={`board-cell ${
                   (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
-                }`}
+                } ${selectedSquare === `${String.fromCharCode(97 + colIndex)}${8 - rowIndex}` ? "selected-cell" : ""}`}
+                onClick={() => handleSquareClick(rowIndex, colIndex)}
               >
                 {cell && pieceMapping[cell] ? (
                   <img src={pieceMapping[cell]} className="chess-piece" alt={cell} />
@@ -127,7 +149,7 @@ const Game = () => {
             placeholder="Конец (например, e4)"
             onChange={(e) => setEndSquare(e.target.value)}
           />
-          <button onClick={makeMove}>Сделать ход</button>
+          <button onClick={() => makeMove(startSquare, endSquare)}>Сделать ход</button>
         </div>
       )}
     </div>

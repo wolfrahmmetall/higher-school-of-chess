@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(User.metadata.create_all)
     
     async with db_helper_game.engine.begin() as conn:
+        await conn.run_sync(Games.metadata.drop_all)
         await conn.run_sync(Games.metadata.create_all)
 
     yield
@@ -44,8 +45,4 @@ app.add_middleware(
 )
 
 if __name__ == '__main__':
-    # path = Path('backend/databases').resolve()
-    # print(path)
-    # print(path.is_dir())
     uvicorn.run("registration:app", host="0.0.0.0", port=8000, reload=True)
-    # print(Path(__file__).parent)

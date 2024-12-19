@@ -14,7 +14,7 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await fetch('http://5.35.5.18/api/users/login', {
+      const response = await fetch('http://127.0.0.1:8000/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password }),
@@ -27,18 +27,9 @@ const LoginForm = () => {
       }
 
       const data = await response.json();
-      console.log('Полученный токен:', data.access_token);
-
-      // Сохраняем токен в localStorage
-      localStorage.setItem('token', data.access_token);
-
-      // Аутентифицируем пользователя (если используется контекст)
-      authenticate(data.access_token);
-
-      // Перенаправляем на дашборд
-      navigate('/dashboard');
+      authenticate(data.token); // Сохраняем токен
+      navigate('/dashboard');  // Переход на защищённую страницу
     } catch (error) {
-      console.error('Ошибка логина:', error);
       setError('Something went wrong. Please try again.');
     }
   };

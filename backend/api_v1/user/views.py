@@ -89,7 +89,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSe
         if user is None:
             raise HTTPException(status_code=401, detail="Пользователь не найден")
         
-        return user
+        return user.id
     except ExpiredSignatureError:
         print(f"Token expired: {token}")
         raise HTTPException(status_code=401, detail="Токен истек")
@@ -98,3 +98,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSe
         print(f"Token received: {token}")
         raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")
 
+async def get_current_user_id(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(payload)
+        user_id: int = int(payload.get("sub"))
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")
+        
+        return user_id
+    except ExpiredSignatureError:
+        print(f"Token expired: {token}")
+        raise HTTPException(status_code=401, detail="Токен истек")
+    except JWTError as e:
+        print(f"JWTError: {str(e)}")
+        print(f"Token received: {token}")
+        raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")

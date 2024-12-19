@@ -1,51 +1,76 @@
-import select
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
-from sqlalchemy import select
+from sqlalchemy.future import select
+from sqlalchemy.exc import NoResultFound
+from typing import Optional, List
+from uuid import uuid4
+from game.chess_game import ChessGame
+from game.game_creation.Game import Games
 
-from .Game import Games
-from pydantic import UUID4, BaseModel
-
-class GameCreate(BaseModel):
-    uuid: str
-    white: Optional[int] = None  # ID игрока в БД
-    black: Optional[int] = None  # ID игрока в БД
-    result: Optional[int] = 0
-    moves: List[str] = []
-
-async def create_game(db: AsyncSession, game: GameCreate) -> Games:
-    """Создает новую игру в базе данных."""
-    db_game = Games(**game.model_dump(exclude={"id"}))
+async def create_game(db: AsyncSession, game: ChessGame) -> Games:
+    """
+    Создает новую игру в базе данных.
+    """
+    db_game = Games(
+        uuid=str(uuid4()),
+        white=game.white,
+        black=game.black,
+        result=game.result,
+        board={'board': game.board.pretty_board()},
+        game_time=game.white_timer,
+        increment=game.increment,
+        # white_timer=game.game_time,
+        # black_timer=game.game_time,
+        current_player_color="white",
+        is_active=True
+    )
     db.add(db_game)
     await db.commit()
     await db.refresh(db_game)
-    return db_game.uuid
+    return db_game
 
-async def get_game(db: AsyncSession, game_uuid: str):
-    """Возвращает игру по её UUID."""
-    return await db.get(Games, game_uuid)
-
-async def update_game(session: AsyncSession, game_uuid: str, game_data: GameCreate):
-    """Обновляет данные игры по UUID."""
+async def get_game(db: AsyncSession, game_uuid: str) -> Optional[Games]:
+    """
+    Возвращает игру по UUID из базы данных.
+    """
     query = select(Games).where(Games.uuid == game_uuid)
-    result = await session.execute(query)
-    db_game = result.scalar_one_or_none()
-    if db_game is None:
-        return HTTPException(status_code=404, detail='Игры не существует.')
-    if db_game:
-        db_game.white = game_data.white
-        db_game.black = game_data.black
-        db_game.result = game_data.result
-        db_game.moves = game_data.moves
-        await session.commit()
-        await session.refresh(db_game)
-    return db_game
+    result = await db.execute(query)
+    try:
+        return result.scalar_one()
+    except NoResultFound:
+        return None
 
-async def delete_game(db: AsyncSession, game_uuid: str):
-    """Удаляет игру из базы данных по UUID."""
-    db_game = db.query(Games).filter(Games.uuid == game_uuid).first()
-    if db_game:
-        db.delete(db_game)
-        await db.commit()
-    return db_game
+async def update_game(db: AsyncSession, game_uuid: str, updated_data: dict) -> Optional[Games]:
+    """
+    Обновляет данные существующей игры.
+    """
+    game = await get_game(db, game_uuid)
+    if not game:
+        return None
+
+    for key, value in updated_data.items():
+        if hasattr(game, key):
+            setattr(game, key, value)
+
+    await db.commit()
+    await db.refresh(game)
+    return game
+
+async def get_all_games(db: AsyncSession) -> List[Games]:
+    """
+    Возвращает список всех игр в базе данных.
+    """
+    query = select(Games)
+    result = await db.execute(query)
+    return result.scalars().all()
+
+async def delete_game(db: AsyncSession, game_uuid: str) -> bool:
+    """
+    Удаляет игру из базы данных по UUID.
+    """
+    game = await get_game(db, game_uuid)
+    if not game:
+        return False
+
+    await db.delete(game)
+    await db.commit()
+    return True

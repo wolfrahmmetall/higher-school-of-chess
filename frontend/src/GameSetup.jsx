@@ -25,6 +25,8 @@ const GameSetup = () => {
       const response = await axios.post(
         `${API_BASE}/setup`,
         {
+          game_time: gameTime,
+          increment: increment,
           white: playerSide === "white", // Отправляем, за кого хочет играть пользователь
           black: playerSide === "black",
         },
@@ -34,7 +36,7 @@ const GameSetup = () => {
       if (response.status === 200) {
         const { uuid } = response.data; // Получаем UUID игры из ответа
         console.log("Игра настроена:", response.data);
-        localStorage.setItem("game_uuid", response.data)
+        localStorage.setItem("game_uuid", uuid)
         navigate(`/chess/${uuid}/`); // Перенаправляем на страницу с UUID
       } else {
         throw new Error("Не удалось настроить игру");
