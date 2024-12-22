@@ -116,6 +116,31 @@ async def get_game_state(uuid: str) -> Dict[str, Any]:
         "result": game.result,
     }
 
+@router.post("/{uuid}/connect")
+async def connect_to_game(uuid: str, session: AsyncSession = Depends(db_helper_game.scoped_session_dependency),
+                          new_player: int = Depends(get_current_user_id)):
+    game = active_games[uuid]   
+
+    if game.white is None:
+        game.white = new_player
+        await update_game(session, uuid, {"white": game.white})
+
+    if game.black is None:
+        game.black = new_player
+        await update_game(session, uuid, {"black": game.black})
+
+    active_games[uuid] = game
+
+    return {
+        "uuid": uuid,
+        "board": game.board.pretty_board(),
+        "current_turn": game.current_player_color,
+        "white_timer": game.white_timer,
+        "black_timer": game.black_timer,
+        "result": game.result,
+    }
+
+
 @router.delete("/{uuid}/delete")
 async def delete_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> Dict[str, str]:
     """
