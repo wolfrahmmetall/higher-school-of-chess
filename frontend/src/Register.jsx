@@ -9,6 +9,9 @@ const Register = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const API_BASE = "http://127.0.0.1:8000";
+  // const API_BASE = "http://5.35.5.18/api"
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -17,13 +20,13 @@ const Register = () => {
     console.log("Данные:", { login, password, email });
 
     try {
-      const response = await axios.post("http://5.35.5.18/api/users/register", {
+      const response = await axios.post(`${API_BASE}/users/register`, {
         login,
         password,
         email,
       });
       console.log("Ответ сервера:", response.data);
-      navigate("/dashboard");
+      navigate("/login");
       console.log("Перенаправление на /dashboard выполнено.");
     } catch (err) {
       console.error("Ошибка регистрации:", err.response?.data || err.message);

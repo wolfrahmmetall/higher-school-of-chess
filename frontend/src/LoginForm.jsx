@@ -9,6 +9,10 @@ const LoginForm = () => {
   const { login: authenticate } = useAuth();
   const navigate = useNavigate();
 
+
+  const API_BASE = "http://127.0.0.1:8000";
+  // const API_BASE = "http://5.35.5.18/api"
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -17,7 +21,7 @@ const LoginForm = () => {
     console.log("Пароль:", password);
 
     try {
-      const response = await fetch('http://5.35.5.18/api/users/login', {
+      const response = await fetch(`${API_BASE}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password }),

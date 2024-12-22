@@ -57,19 +57,34 @@ const Game = () => {
       console.log("Game state fetched successfully:", response.data);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
+      console.log(response.data.message)
     } catch (error) {
       console.error("Error fetching game state:", error);
     }
   };
 
+
+  useEffect(() => {
+    console.log("Component mounted, fetching game state.");
+    fetchGameState();
+  }, []);
+  
   const makeMove = async (start, end) => {
     console.log("Making move from:", start, "to:", end);
     try {
+      const token = localStorage.getItem("authToken"); // Токен аутентификации из localStorage
+      console.log("Токен из localStorage:", token);
+      if (!token) {
+        throw new Error("Вы не авторизованы.");
+      }
+
+      const headers = { Authorization: `Bearer ${token}` }; // Передаем токен в заголовке
+
       if (start && end) {
         const response = await axios.post(`${API_BASE}/chess/${uuid}/move`, {
           start: start,
           end: end,
-        });
+        }, {headers});
         console.log("Move successful, response:", response.data);
         setBoard(prepareBoard(response.data.board));
         setCurrentTurn(response.data.current_turn);
@@ -103,10 +118,6 @@ const Game = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Component mounted, fetching game state.");
-    fetchGameState();
-  }, []);
 
   return (
     <div className="game-container">

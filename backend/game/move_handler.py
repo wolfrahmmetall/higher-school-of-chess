@@ -1,3 +1,4 @@
+from hmac import new
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,10 +36,10 @@ async def setup_game(settings: GameSetup,
     # try:
     game = ChessGame(settings.game_time,
                          settings.increment)
-        # if settings.white:
-        #     game.white = curr_user
-        # if settings.black:
-        #     game.black = curr_user
+    if settings.white:
+        game.white = curr_user
+    if settings.black:
+        game.black = curr_user
 
     game.start_game()  # Инициализация игры
     active_games[uuid] = game
@@ -57,7 +58,7 @@ async def setup_game(settings: GameSetup,
 @router.post("/{uuid}/move")
 async def make_move(uuid: str, move: Move, 
                     session: AsyncSession = Depends(db_helper_game.scoped_session_dependency),
-                    # curr_user: int = Depends(get_current_user_id)
+                    curr_user: int = Depends(get_current_user_id)
                     ) -> Dict[str, Any]:
     """
     Обрабатывает ход в игре.
@@ -67,12 +68,15 @@ async def make_move(uuid: str, move: Move,
         raise HTTPException(status_code=404, detail="Игра не найдена")
 
     try:
-        # if curr_user != game.white or curr_user != game.black:
-        #     return {
-        #     "board": game.board,
-        #     "current_turn": game.current_player_color,
-        #     "result": game.result,
-        # }
+        if curr_user != game.white and curr_user != game.black or \
+            curr_user != game.white and game.current_player_color == "white" or \
+                curr_user != game.black and game.current_player_color == "black":
+            return {
+            "message":f"Вам сейчас нельзя ходить!, ваш id: {curr_user}, белые: {game.white}, черные:",
+            "board": game.board.pretty_board(),
+            "current_turn": game.current_player_color,
+            "result": game.result,
+        }
         game.move(move.start, move.end)
         board_state: List[List[str]] = [
             # [piece.name() if piece else '\uA900' for piece in row]
@@ -81,6 +85,7 @@ async def make_move(uuid: str, move: Move,
         ]
         active_games[uuid] = game
         return {
+            "message": "Ход выполнен успешно!",
             "board": board_state,
             "current_turn": game.current_player_color,
             "result": game.result,
@@ -89,7 +94,7 @@ async def make_move(uuid: str, move: Move,
         raise HTTPException(status_code=400, detail=f"Ошибка при обработке хода: {str(e)}")
 
 @router.get("/{uuid}/state")
-async def get_game_state(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> Dict[str, Any]:
+async def get_game_state(uuid: str) -> Dict[str, Any]:
     """
     Возвращает текущее состояние доски и информацию об игре.
     """
