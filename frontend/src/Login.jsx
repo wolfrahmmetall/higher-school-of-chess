@@ -10,8 +10,8 @@ const Login = () => {
   const { login: authenticate } = useAuth();
   const navigate = useNavigate();
 
-  const API_BASE = "http://127.0.0.1:8000";
-  // const API_BASE = "http://5.35.5.18/api";
+  // const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
