@@ -21,7 +21,12 @@ async def get_users(session: AsyncSession) -> list[User]:
     return list(users)
 
 async def get_user_by_id(session: AsyncSession, uid: int):
-    return await session.get(User, uid)
+    print(uid)
+    query = select(User).where(User.id == uid)
+    result = await session.execute(query)
+    user = result.scalar_one_or_none()
+    return user
+
 
 async def get_user_by_login(session: AsyncSession, login:str):
     query = select(User).where(User.login == login)
@@ -66,11 +71,15 @@ if __name__ == '__main__':
     import asyncio
     async def af():
         u: dict = {'login': 'Ultimate',
+                   'password': 'ps',
                     "email": 'user@example.com',
                     'elo_score': 42.923}
         
-        user = CreateUser(**u)
-        res = await create_user(db_helper_user.get_scoped_session(), user)
-        print(res.login, res.email)
+        # user = CreateUser(**u)
+        # res = await create_user(db_helper_user.get_scoped_session(), user)
+        # print(res.login, res.email)
+
+        ans = await get_user_by_id(db_helper_user.get_scoped_session(), 4)
+        print(ans.login)
 
     asyncio.run(af())

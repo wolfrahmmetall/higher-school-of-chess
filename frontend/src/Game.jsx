@@ -31,7 +31,7 @@ const pieceMapping = {
 };
 
 const Game = () => {
-  const { uuid } = useParams(); // Получаем UUID из параметров маршрута
+  const { uuid } = useParams();
   const [board, setBoard] = useState([]);
   const [currentTurn, setCurrentTurn] = useState("");
   const [gameStatus, setGameStatus] = useState("");
@@ -39,65 +39,79 @@ const Game = () => {
   const [endSquare, setEndSquare] = useState("");
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
-
-  // const API_BASE = "http://5.35.5.18/api";
-  const API_BASE = "http://127.0.0.1:8000"
+  const [whitePlayer, setWhitePlayer] = useState(null);
+  const [blackPlayer, setBlackPlayer] = useState(null);
+  const [theme, setTheme] = useState("light"); // Default theme
+  
+  const API_BASE = "http://127.0.0.1:8000";
 
   const prepareBoard = (board) => {
-    console.log("Preparing board:", board); // Лог текущей доски
     return board.map((row) =>
       row.map((cell) => (cell && typeof cell === "object" ? cell.name : cell || ""))
     );
   };
 
   const fetchGameState = async () => {
-    console.log("Fetching game state for UUID:", uuid);
     try {
-      // const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
       const response = await axios.get(`${API_BASE}/chess/${uuid}/`);
-      console.log("Game state fetched successfully:", response.data);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
-      console.log(response.data.message)
     } catch (error) {
       console.error("Error fetching game state:", error);
     }
   };
 
+  const fetchPlayers = async () => {
+    try {
+      const whiteResponse = await axios.get(`${API_BASE}/chess/${uuid}/white-player`);
+      setWhitePlayer(whiteResponse.data.white_player);
+
+      const blackResponse = await axios.get(`${API_BASE}/chess/${uuid}/black-player`);
+      setBlackPlayer(blackResponse.data.black_player);
+    } catch (error) {
+      console.error("Error fetching player data:", error);
+    }
+  };
+  const toggleTheme = () => {
+    const nextTheme =
+      theme === "light"
+        ? "dark"
+        : theme === "dark"
+        ? "yellow"
+        : theme === "yellow"
+        ? "purple"
+        : "light";
+    setTheme(nextTheme);
+  };
+
+
 
   useEffect(() => {
-    console.log("Component mounted, fetching game state.");
     fetchGameState();
-  }, []);
-  
+    fetchPlayers(); 
+    document.body.className = theme;
+  }, [theme]);
+
   const makeMove = async (start, end) => {
-    console.log("Making move from:", start, "to:", end);
     try {
-      const token = localStorage.getItem("authToken"); // Токен аутентификации из localStorage
-      console.log("Токен из localStorage:", token);
+      const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Вы не авторизованы.");
       }
 
-      const headers = { Authorization: `Bearer ${token}` }; // Передаем токен в заголовке
-
+      const headers = { Authorization: `Bearer ${token}` };
       if (start && end) {
-        const response = await axios.post(`${API_BASE}/chess/${uuid}/move`, {
-          start: start,
-          end: end,
-        }, {headers});
-        console.log("Move successful, response:", response.data);
+        const response = await axios.post(
+          `${API_BASE}/chess/${uuid}/move`,
+          { start, end },
+          { headers }
+        );
         setBoard(prepareBoard(response.data.board));
         setCurrentTurn(response.data.current_turn);
         setGameResult(response.data.result);
         setStartSquare("");
         setEndSquare("");
         setSelectedSquare(null);
-        await axios.post(`${API_BASE}/chess/${uuid}/move`, {
-          start: "a1",
-          end: "a1",
-        }, {headers});
-        
       }
     } catch (error) {
       console.error("Error making move:", error);
@@ -105,61 +119,72 @@ const Game = () => {
   };
 
   const handleSquareClick = (rowIndex, colIndex) => {
-    const file = String.fromCharCode(97 + colIndex); // a-h
-    const rank = 8 - rowIndex; // 8-1
+    const file = String.fromCharCode(97 + colIndex);
+    const rank = 8 - rowIndex;
     const square = `${file}${rank}`;
 
-    console.log("Square clicked:", square);
-
     if (!startSquare) {
-      console.log("Start square selected:", square);
       setStartSquare(square);
       setSelectedSquare(square);
     } else {
-        console.log("End square selected:", square);
-        setEndSquare(square);
-        makeMove(startSquare, square);
+      setEndSquare(square);
+      makeMove(startSquare, square);
     }
   };
 
-
   return (
     <div className="game-container">
-      <h2>Шахматная игра</h2>
-      {gameResult ? (
-        <p className="game-result">
-          Результат игры: {gameResult === "draw" ? "Ничья" : `${gameResult}`}
-        </p>
-      ) : (
-        <p>Текущий ход: {currentTurn}</p>
-      )}
-      <div className="chess-board-container">
-        <div className="notation-row">
-          <div className="notation-cell"></div>
-          {"ABCDEFGH".split("").map((letter) => (
-            <span key={letter} className="notation-cell">
-              {letter}
-            </span>
-          ))}
+      <h2 className="player-info">Шахматная игра</h2>
+      <button onClick={toggleTheme} className="theme-toggle">
+        Переключить тему ({theme === "light" ? "Светлая" : theme === "dark" ? "Ночная" : theme === "yellow" ? "Желтая" : "Фиолетовая"})
+      </button>
+      <div className="game-layout">
+        <div className="player-info player-info-left">
+          <h3>
+            Белый игрок: {whitePlayer ? `${whitePlayer.login}` : "Waiting..."}</h3> 
+          <h3>(ELO: {whitePlayer? `${whitePlayer.elo}` : " "})
+          </h3>
         </div>
-        {board.map((row, rowIndex) => (
-          <div key={rowIndex} className="board-row">
-            <span className="notation-cell">{8 - rowIndex}</span>
-            {row.map((cell, colIndex) => (
-              <span
-                key={colIndex}
-                className={`board-cell ${
-                  (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
-                } ${selectedSquare === `${String.fromCharCode(97 + colIndex)}${8 - rowIndex}` ? "selected-cell" : ""}`}
-                onClick={() => handleSquareClick(rowIndex, colIndex)}
-              >
-                {cell && pieceMapping[cell] ? (
-                  <img src={pieceMapping[cell]} className="chess-piece" alt={cell} />
-                ) : '\u00A0'}
+        <div className="chess-board-container">
+          <div className="notation-row">
+            <div className="notation-cell"></div>
+            {"ABCDEFGH".split("").map((letter) => (
+              <span key={letter} className="notation-cell">
+                {letter}
               </span>
             ))}
           </div>
-        ))}
+          {board.map((row, rowIndex) => (
+            <div key={rowIndex} className="board-row">
+              <span className="notation-cell">{8 - rowIndex}</span>
+              {row.map((cell, colIndex) => (
+                <span
+                  key={colIndex}
+                  className={`board-cell ${
+                    (rowIndex + colIndex) % 2 === 0 ? "light-cell" : "dark-cell"
+                  } ${
+                    selectedSquare === `${String.fromCharCode(97 + colIndex)}${8 - rowIndex}`
+                      ? "selected-cell"
+                      : ""
+                  }`}
+                  onClick={() => handleSquareClick(rowIndex, colIndex)}
+                >
+                  {cell && pieceMapping[cell] ? (
+                    <img src={pieceMapping[cell]} className="chess-piece" alt={cell} />
+                  ) : "\u00A0"}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="player-info player-info-right">
+          <h3>
+            Черный игрок: {blackPlayer ? `${blackPlayer.login}` : "Waiting..."}
+          </h3> 
+          <h3>
+            (ELO: {blackPlayer? `${blackPlayer.elo}` : " "})
+          </h3>
+        </div>
       </div>
       {!gameResult && (
         <div className="move-inputs">
@@ -181,5 +206,4 @@ const Game = () => {
     </div>
   );
 };
-
 export default Game;

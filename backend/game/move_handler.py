@@ -4,8 +4,9 @@ from typing import Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from uuid import UUID, uuid4
-from api_v1.user.views import get_current_user, get_current_user_id
-from dbpackage.DBHelper import db_helper_game
+from api_v1.user.views import get_current_user_id
+from api_v1.user.crud import get_user_by_id
+from dbpackage.DBHelper import db_helper_game, db_helper_user
 from game.game_creation.crud import create_game, get_all_games, get_game, update_game
 from game.chess_game import ChessGame
 
@@ -173,3 +174,54 @@ async def delete_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scope
 
     return {"message": "Игра удалена"}
 
+@router.get("/{uuid}/white-player")
+async def get_white_player(
+    uuid: str,
+    session: AsyncSession = Depends(db_helper_user.scoped_session_dependency),
+) -> Dict[str, Any]:
+    """
+    Возвращает информацию о белом игроке (логин).
+    """
+    game = active_games.get(uuid)
+    if not game:
+        raise HTTPException(status_code=404, detail="Игра не найдена")
+
+    if game.white is None:
+        return {"uuid": uuid, "white_player": None}
+
+    # Получаем логин белого игрока
+    white_player = await get_user_by_id(session, game.white)
+    if not white_player:
+        raise HTTPException(status_code=404, detail="Белый игрок не найден")
+
+    return {
+        "uuid": uuid,
+        "white_player": {"login": white_player.login, "elo": white_player.elo_score},
+    }
+
+
+@router.get("/{uuid}/black-player")
+async def get_black_player(
+    uuid: str,
+    session: AsyncSession = Depends(db_helper_user.scoped_session_dependency),
+
+) -> Dict[str, Any]:
+    """
+    Возвращает информацию о черном игроке (логин).
+    """
+    game = active_games.get(uuid)
+    if not game:
+        raise HTTPException(status_code=404, detail="Игра не найдена")
+
+    if game.black is None:
+        return {"uuid": uuid, "black_player": None}
+
+    # Получаем логин черного игрока
+    black_player = await get_user_by_id(session, game.black)
+    if not black_player:
+        raise HTTPException(status_code=404, detail="Черный игрок не найден")
+
+    return {
+        "uuid": uuid,
+        "black_player": {"login": black_player.login, "elo": black_player.elo_score},
+    }

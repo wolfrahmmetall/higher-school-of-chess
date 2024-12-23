@@ -89,7 +89,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSe
         if user is None:
             raise HTTPException(status_code=401, detail="Пользователь не найден")
         
-        return user.id
+        return user
     except ExpiredSignatureError:
         print(f"Token expired: {token}")
         raise HTTPException(status_code=401, detail="Токен истек")
