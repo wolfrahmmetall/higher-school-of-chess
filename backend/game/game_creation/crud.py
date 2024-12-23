@@ -6,12 +6,12 @@ from uuid import uuid4
 from game.chess_game import ChessGame
 from game.game_creation.Game import Games
 
-async def create_game(db: AsyncSession, game: ChessGame) -> Games:
+async def create_game(db: AsyncSession, game: ChessGame, uuid: str) -> Games:
     """
     Создает новую игру в базе данных.
     """
     db_game = Games(
-        uuid=str(uuid4()),
+        uuid=uuid,
         white=game.white,
         black=game.black,
         result=game.result,

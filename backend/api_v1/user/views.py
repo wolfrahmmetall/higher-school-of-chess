@@ -114,3 +114,20 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)):
         print(f"JWTError: {str(e)}")
         print(f"Token received: {token}")
         raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")
+
+
+@router.get('/me')
+async def me(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload['sub'] is None:
+            raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")
+        
+        return payload
+    except ExpiredSignatureError:
+        print(f"Token expired: {token}")
+        raise HTTPException(status_code=401, detail="Токен истек")
+    except JWTError as e:
+        print(f"JWTError: {str(e)}")
+        print(f"Token received: {token}")
+        raise HTTPException(status_code=401, detail="Не удалось подтвердить учетные данные")

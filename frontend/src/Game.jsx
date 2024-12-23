@@ -40,8 +40,8 @@ const Game = () => {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  const API_BASE = "http://5.35.5.18/api";
-  // const API_BASE = "http://127.0.0.1:8000"
+  // const API_BASE = "http://5.35.5.18/api";
+  const API_BASE = "http://127.0.0.1:8000"
 
   const prepareBoard = (board) => {
     console.log("Preparing board:", board); // Лог текущей доски
@@ -53,7 +53,8 @@ const Game = () => {
   const fetchGameState = async () => {
     console.log("Fetching game state for UUID:", uuid);
     try {
-      const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
+      // const response = await axios.get(`${API_BASE}/chess/${uuid}/state`);
+      const response = await axios.get(`${API_BASE}/chess/${uuid}/`);
       console.log("Game state fetched successfully:", response.data);
       setBoard(prepareBoard(response.data.board));
       setCurrentTurn(response.data.current_turn);
@@ -92,6 +93,11 @@ const Game = () => {
         setStartSquare("");
         setEndSquare("");
         setSelectedSquare(null);
+        await axios.post(`${API_BASE}/chess/${uuid}/move`, {
+          start: "a1",
+          end: "a1",
+        }, {headers});
+        
       }
     } catch (error) {
       console.error("Error making move:", error);
@@ -110,11 +116,9 @@ const Game = () => {
       setStartSquare(square);
       setSelectedSquare(square);
     } else {
-      if (square !== startSquare) {
         console.log("End square selected:", square);
         setEndSquare(square);
         makeMove(startSquare, square);
-      }
     }
   };
 

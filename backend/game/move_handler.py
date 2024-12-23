@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from uuid import UUID, uuid4
 from api_v1.user.views import get_current_user, get_current_user_id
 from dbpackage.DBHelper import db_helper_game
-from game.game_creation.crud import create_game, get_game, update_game
+from game.game_creation.crud import create_game, get_all_games, get_game, update_game
 from game.chess_game import ChessGame
 
 router = APIRouter()
@@ -43,7 +43,7 @@ async def setup_game(settings: GameSetup,
 
     game.start_game()  # Инициализация игры
     active_games[uuid] = game
-    await create_game(session, game)
+    await create_game(session, game, uuid)
     return {
         "message": "Игра настроена",
         "uuid": uuid,
@@ -93,7 +93,7 @@ async def make_move(uuid: str, move: Move,
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Ошибка при обработке хода: {str(e)}")
 
-@router.get("/{uuid}/state")
+@router.get("/{uuid}/")
 async def get_game_state(uuid: str) -> Dict[str, Any]:
     """
     Возвращает текущее состояние доски и информацию об игре.
@@ -140,6 +140,24 @@ async def connect_to_game(uuid: str, session: AsyncSession = Depends(db_helper_g
         "result": game.result,
     }
 
+@router.get("/active-games")
+async def get_active_games(db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> List[Dict[str, Any]]:
+    """
+    Возвращает список всех активных игр.
+    """
+    games = await get_all_games(db)
+    return [
+        {
+            "uuid": game.uuid,
+            "white": game.white,
+            "black": game.black,
+            "game_time": game.game_time,
+            "increment": game.increment,
+            "is_active": game.is_active,
+            "current_turn": game.current_player_color,
+        }
+        for game in games if game.is_active
+    ]
 
 @router.delete("/{uuid}/delete")
 async def delete_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scoped_session_dependency)) -> Dict[str, str]:
@@ -154,3 +172,4 @@ async def delete_game(uuid: str, db: AsyncSession = Depends(db_helper_game.scope
         raise HTTPException(status_code=404, detail="Игра не найдена")
 
     return {"message": "Игра удалена"}
+
