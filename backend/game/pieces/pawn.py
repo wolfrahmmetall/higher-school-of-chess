@@ -101,34 +101,34 @@ class Pawn(Piece):
             new_col: int
     ):
         """
-        Promotes the pawn to the chosen piece. Supports Queen, Rook, Bishop, and Knight.
-
-        :param board: The current board.
-        :param new_row: The new row after the move.
-        :param new_col: The new column after the move.
+        Превращает пешку всегда в ферзя.
         """
-        # Mapping symbols to piece classes
-        piece_classes = {
-            'Q': Queen,
-            'R': Rook,
-            'B': Bishop,
-            'N': Knight
-        }
 
-        # Prompt the user for promotion choice
-        while True:
-            promotion_choice = input("Choose promotion piece (Q, R, B, N): ").upper()
-            if promotion_choice in piece_classes:
-                break
-            else:
-                print("Invalid choice. Please try again.")
+        # Ниже закомментированная логика выбора фигуры.
+        # Оставлена для примера, но больше не используется.
+        #
+        # piece_classes = {
+        #     'Q': Queen,
+        #     'R': Rook,
+        #     'B': Bishop,
+        #     'N': Knight
+        # }
+        #
+        # while True:
+        #     promotion_choice = input("Choose promotion piece (Q, R, B, N): ").upper()
+        #     if promotion_choice in piece_classes:
+        #         break
+        #     else:
+        #         print("Invalid choice. Please try again.")
+        #
+        # promoted_piece = piece_classes[promotion_choice](self.color, (new_row, new_col))
 
-        # Create a new object of the chosen piece
-        promoted_piece = piece_classes[promotion_choice](self.color, (new_row, new_col))
+        # В данной версии пешка всегда превращается в ферзя:
+        promoted_piece = Queen(self.color, (new_row, new_col))
 
-        # Place the new piece on the board
+        # Ставим новую фигуру на доску
         board[new_row][new_col] = promoted_piece
-
+    
     def show_possible_moves(
         self,
         board: List[List[Optional['Piece']]],
