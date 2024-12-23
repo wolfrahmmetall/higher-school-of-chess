@@ -138,6 +138,13 @@ const Game = () => {
       <button onClick={toggleTheme} className="theme-toggle">
         Переключить тему ({theme === "light" ? "Светлая" : theme === "dark" ? "Ночная" : theme === "yellow" ? "Желтая" : "Фиолетовая"})
       </button>
+      {gameResult ? (
+        <p className="game-result">
+          Результат игры: {gameResult === "draw" ? "Ничья" : `${gameResult}`}
+        </p>
+      ) : (
+        <p>Текущий ход: {currentTurn}</p>
+      )}
       <div className="game-layout">
         <div className="player-info player-info-left">
           <h3>
