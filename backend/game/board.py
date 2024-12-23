@@ -39,6 +39,14 @@ class Board:
                     print(letters[k], end=' ')
                 print("\n")
 
+    def pretty_board(self) -> List[List[str]]:
+        board_state: List[List[str]] = [
+            # [piece.name() if piece else '\uA900' for piece in row]
+            [piece.name() if piece else '\u00A0' for piece in row]
+            for row in self.board
+        ]
+        return board_state
+
     def start_board(self):
         for i in range(8):
             for j in range(8):

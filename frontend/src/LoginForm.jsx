@@ -9,27 +9,40 @@ const LoginForm = () => {
   const { login: authenticate } = useAuth();
   const navigate = useNavigate();
 
+
+  // const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api"
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    console.log("Попытка входа с данными:");
+    console.log("Логин:", login);
+    console.log("Пароль:", password);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/users/login', {
+      const response = await fetch(`${API_BASE}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password }),
       });
 
+      console.log("Ответ сервера:", response);
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Ошибка авторизации:", errorData);
         setError(errorData.detail || 'Invalid login or password');
         return;
       }
 
       const data = await response.json();
+      console.log("Успешный ответ от сервера:", data);
+      
       authenticate(data.token); // Сохраняем токен
+      console.log("Токен сохранён, переход на /dashboard");
       navigate('/dashboard');  // Переход на защищённую страницу
     } catch (error) {
+      console.error("Ошибка при выполнении запроса на логин:", error);
       setError('Something went wrong. Please try again.');
     }
   };

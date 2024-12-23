@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from dbpackage.DBHelper import db_helper_user
+from api_v1.user.User import User
+from game.game_creation.Game import Games
+from dbpackage.DBHelper import db_helper_user, db_helper_game
 from dbpackage.Base import Base
 from api_v1 import router as router_v1
 from game import router as game_router
@@ -12,7 +14,13 @@ import uvicorn
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with db_helper_user.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        # await conn.run_sync(User.metadata.drop_all)
+        await conn.run_sync(User.metadata.create_all)
+    
+    async with db_helper_game.engine.begin() as conn:
+        await conn.run_sync(Games.metadata.drop_all)
+        await conn.run_sync(Games.metadata.create_all)
+
     yield
 
 
@@ -22,10 +30,11 @@ app.include_router(router=router_v1)
 app.include_router(router=game_router)
 
 origins = [
+    "http://5.35.5.18",
     "http://127.0.0.1",
     "http://127.0.0.1:8000",
     "http://localhost:8080",
-    'http://localhost:5173'
+    'http://localhost:5173',
 ]
 
 app.add_middleware(
@@ -36,17 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get('/')
-def hello_api():
-    return {'msg':'hello_api'}
-
-@app.get('/items')
-def show_leaderboard():
-    return ('Aalik', 'IvanZ')
-
 if __name__ == '__main__':
-    # path = Path('backend/databases').resolve()
-    # print(path)
-    # print(path.is_dir())
-    uvicorn.run("registration:app", reload=True)
-    # print(Path(__file__).parent)
+    uvicorn.run("registration:app", host="0.0.0.0", port=8000, reload=True)
+    # uvicorn.run("registration:app", port=8000, reload=True)
+    

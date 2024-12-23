@@ -6,12 +6,16 @@ const RequireAuth = ({ children }) => {
   const { token } = useAuth();
   const location = useLocation();
 
+  console.log("Проверка авторизации:");
+  console.log("Текущий токен:", token);
+  console.log("Текущая локация:", location.pathname);
+
   if (!token) {
-    // Сохраняем текущую страницу для возврата после входа
     console.log("Пользователь не авторизован. Перенаправление на /login.");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  console.log("Пользователь авторизован. Отображение защищенного компонента.");
   return children;
 };
 

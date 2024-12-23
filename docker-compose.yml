@@ -1,0 +1,33 @@
+networks:
+  dev:
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+      - '/etc/letsencrypt:/etc/letsencrypt'
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - dev
+
+  backend:
+    build:
+      context: ./backend
+    networks:
+      - dev
+    mem_limit: 1200M
+    cpus: "0.7"
+
+  frontend:
+    build:
+      context: ./frontend
+    networks:
+      - dev
+    mem_limit: 256M
+    cpus: "0.3"

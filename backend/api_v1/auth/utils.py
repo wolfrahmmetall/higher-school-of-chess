@@ -31,8 +31,8 @@ def decode_jwt(
 def hash_password(password: str) -> bytes:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
-def validate_password(password: str , hash: bytes) -> bool:
-    return bcrypt.checkpw(password=password.encode(), hashed_password=hash)
+def validate_password(password: str , hashed_password: bytes) -> bool:
+    return bcrypt.checkpw(password=password.encode(), hashed_password=hashed_password)
 
 # TODO: code CRUDs for logging users in + its DB.
 # TODO: After that create a blank html page with proper forms and redirection buttons. The design is on Alik

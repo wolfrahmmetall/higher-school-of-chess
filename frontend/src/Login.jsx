@@ -7,47 +7,67 @@ const Login = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login: saveToken } = useAuth();
+  const { login: authenticate } = useAuth();
   const navigate = useNavigate();
+
+  // const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-  
-    const payload = { login, password }; // Проверка формата данных
-    console.log("Payload:", payload); // Логирование данных перед отправкой
-  
+    console.log("Попытка входа с данными:");
+    console.log("Логин:", login);
+    console.log("Пароль:", password);
+
     try {
-      const response = await axios.post("http://127.0.0.1:8000/users/login", payload);
-      saveToken(response.data.access_token);
-      navigate("/dashboard");
+      const response = await axios.post(`${API_BASE}/users/login`, {
+        login,
+        password,
+      });
+
+      console.log("Ответ от сервера:", response);
+
+      if (response.data.access_token) {
+        const token = response.data.access_token;
+        console.log("Токен получен:", token);
+
+        // Сохраняем токен через AuthProvider для синхронизации состояния
+        authenticate(token);
+
+        // Перенаправляем пользователя на защищенную страницу
+        console.log("Перенаправление на /dashboard");
+        navigate("/dashboard");
+      } else {
+        console.error("Токен отсутствует в ответе сервера");
+        setError("Авторизация не удалась. Токен отсутствует.");
+      }
     } catch (err) {
-      console.error("Error response:", err.response?.data); // Логирование ошибки сервера
-      setError(err.response?.data?.detail || "Login failed");
+      console.error("Ошибка при логине:", err.response?.data || err.message);
+      setError(err.response?.data?.detail || "Ошибка авторизации. Проверьте введенные данные.");
     }
   };
-  
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Авторизация</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Login"
+          placeholder="Логин"
           value={login}
           onChange={(e) => setLogin(e.target.value)}
           required
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Пароль"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Login</button>
+        <button type="submit">Войти</button>
       </form>
       <p>
         Не зарегистрированы? <a href="/register">Зарегистрируйтесь</a>

@@ -5,13 +5,12 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import RequireAuth from "./RequireAuth";
 import Game from "./Game";
-import GameSetup from "./GameSetup"; // Импорт нового компонента
+import GameSetup from "./GameSetup";
 import { AuthProvider } from "./AuthProvider";
 
 import './index.css';
 import './App.css'; 
-import './Game.css'
-
+import './Game.css';
 
 const App = () => {
   return (
@@ -29,14 +28,15 @@ const App = () => {
             } 
           />
           <Route 
-          path="/game/setup" 
-          element={
-          <RequireAuth>
-            <GameSetup />
-          </RequireAuth>
-          } /> {/* Новый маршрут */}
+            path="/game/setup" 
+            element={
+              <RequireAuth>
+                <GameSetup />
+              </RequireAuth>
+            } 
+          />
           <Route 
-            path="/game" 
+            path="/chess/:uuid" 
             element={
               <RequireAuth>
                 <Game />

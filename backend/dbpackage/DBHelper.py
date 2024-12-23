@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Any
 from sqlalchemy.ext.asyncio import (create_async_engine, 
                                     async_sessionmaker, 
                                     async_scoped_session)
-from pkgs.config import settings_auth, settings_user
+from pkgs.config import settings_games, settings_user
 class DatabaseHelper:
     def __init__(self, url:str, echo:bool = False):
         self.engine = create_async_engine(
@@ -33,3 +33,5 @@ class DatabaseHelper:
         await session.close()
 
 db_helper_user = DatabaseHelper(url=settings_user.DATABASE_NAME, echo=settings_user.DATABASE_ECHO)
+
+db_helper_game = DatabaseHelper(url=settings_games.DATABASE_NAME, echo=settings_games.DATABASE_ECHO)
