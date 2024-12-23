@@ -21,8 +21,8 @@ services:
       context: ./backend
     networks:
       - dev
-    mem_limit: 800M
-    cpus: "0.5"
+    mem_limit: 1200M
+    cpus: "0.7"
 
   frontend:
     build:
