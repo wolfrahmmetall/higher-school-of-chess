@@ -43,8 +43,8 @@ const Game = () => {
   const [blackPlayer, setBlackPlayer] = useState(null);
   const [theme, setTheme] = useState("light"); // Default theme
   
-  const API_BASE = "http://127.0.0.1:8000";
-
+  // const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api/";
   const prepareBoard = (board) => {
     return board.map((row) =>
       row.map((cell) => (cell && typeof cell === "object" ? cell.name : cell || ""))

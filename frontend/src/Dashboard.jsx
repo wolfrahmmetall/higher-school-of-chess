@@ -14,7 +14,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_BASE = "http://127.0.0.1:8000";
+  // const API_BASE = "http://127.0.0.1:8000";
+  const API_BASE = "http://5.35.5.18/api";
 
   useEffect(() => {
     const fetchUsername = async () => {
